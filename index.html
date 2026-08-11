@@ -79,16 +79,20 @@
        { id: 'm15', name: 'Jeruk peras', category: 'Fresh Drink', price: 15000, desc: 'Teh hibiscus diseduh dingin bersama potongan stroberi segar dan mint.', image: 'https://images.bukaolshop.com/hosting/38154/2eb01ccfbe56865906.png' },
 
 
+      const INITIAL_MENU = [
+  // Menu-menu lama...
+  
+  // Tambahkan menu baru di bawah ini:
   { 
     id: 'm17', 
     name: 'Waffle Ice Cream', 
-    category: 'SIGNATURE', // <-- Sesuaikan kategorinya di sini
+    category: 'Dessert', // <-- Sesuaikan kategorinya di sini
     price: 30000, 
     desc: 'Waffle hangat renyah disajikan dengan 1 scoop es krim vanila.', 
     image: 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=500&q=80' 
   },
 ];
-      
+    
     ];
 
     // DAFTAR PROMO KODE VOUCHER
@@ -714,7 +718,7 @@
                 {currentTab === 'menu' && (
                   <div className="space-y-5">
                     <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                      {['Semua', 'Coffee', 'Non Coffee', 'Fresh Drink', 'Cemilan', 'SIGNATURE'].map(cat => (
+                     {['Semua', 'Coffee', 'Non Coffee', 'Fresh Drink', 'Cemilan', 'Dessert'].map(cat => (
                         <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${selectedCategory === cat ? 'bg-[#0B8F5A] text-white shadow' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border'}`}>
                           {cat}
                         </button>
