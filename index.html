@@ -121,6 +121,7 @@
         return saved ? JSON.parse(saved) : [];
       });
 
+      // PROMO VOUCHER
       const [promosList, setPromosList] = useState([]);
       const [isLoadingPromos, setIsLoadingPromos] = useState(false);
 
@@ -148,7 +149,7 @@
 
       const [adminPromoModal, setAdminPromoModal] = useState({ open: false, item: null });
 
-      // FETCH PROMO DARI SPREADSHEET (MURNI VALID JSON)
+      // FETCH PROMO DARI GOOGLE SHEETS
       const fetchPromosFromSpreadsheet = async () => {
         setIsLoadingPromos(true);
         try {
@@ -158,7 +159,7 @@
             setPromosList(result.promos);
           }
         } catch (err) {
-          console.error('Gagal mengambil promo dari spreadsheet:', err);
+          console.error('Gagal mengambil promo:', err);
         } finally {
           setIsLoadingPromos(false);
         }
@@ -180,18 +181,25 @@
         localStorage.setItem('rs_orders_list', JSON.stringify(orders));
       }, [orders]);
 
+      // SAFE FETCH HELPER (MENGATASI PROBLEM CROS/JSON)
+      const postToDatabase = async (payload) => {
+        const res = await fetch(SCRIPT_DATABASE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        return await res.json();
+      };
+
       const syncUserToSpreadsheet = async (updatedUser) => {
         try {
-          await fetch(SCRIPT_DATABASE_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-              action: 'updateUser',
-              phone: formatPhoneNumber(updatedUser.phone),
-              points: updatedUser.points,
-              myVouchers: updatedUser.myVouchers,
-              claimedQRs: updatedUser.claimedQRs,
-              usedPromoCodes: updatedUser.usedPromoCodes || []
-            })
+          await postToDatabase({
+            action: 'updateUser',
+            phone: formatPhoneNumber(updatedUser.phone),
+            points: updatedUser.points,
+            myVouchers: updatedUser.myVouchers,
+            claimedQRs: updatedUser.claimedQRs,
+            usedPromoCodes: updatedUser.usedPromoCodes || []
           });
         } catch (err) {
           console.error('Gagal sync ke spreadsheet:', err);
@@ -233,23 +241,13 @@
 
         setIsLoadingAuth(true);
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-
         try {
           let payload = { action: authMode, phone, password };
           if (authMode === 'register') {
             payload.name = formData.get('name').trim();
           }
 
-          const res = await fetch(SCRIPT_DATABASE_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId);
-          const result = await res.json();
+          const result = await postToDatabase(payload);
 
           if (result.success) {
             setCurrentUser(result.user);
@@ -259,12 +257,7 @@
             showToast(result.message, 'error');
           }
         } catch (error) {
-          clearTimeout(timeoutId);
-          if (error.name === 'AbortError') {
-            showToast('Koneksi lambat (Server sedang siap-siap). Silakan klik sekali lagi!', 'error');
-          } else {
-            showToast('Gagal terhubung ke Database. Periksa koneksi Anda.', 'error');
-          }
+          showToast('Gagal terhubung ke Database. Coba klik sekali lagi!', 'error');
         } finally {
           setIsLoadingAuth(false);
         }
@@ -543,7 +536,7 @@
         showToast(`Berhasil menukarkan "${reward.name}"! Voucher tersimpan.`);
       };
 
-      // FUNGSI SIMPAN PROMO KE GOOGLE SHEETS (VALID JSON PAYLOAD)
+      // FUNGSI SIMPAN PROMO DARI ADMIN KE SPREADSHEET
       const handleSavePromoItem = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -560,15 +553,10 @@
           discountAmount: type === 'fixed' ? val : 0
         };
 
-        showToast('Menyimpan ke Google Sheets...');
+        showToast('Menyimpan promo ke Google Sheets...');
         
         try {
-          const res = await fetch(SCRIPT_DATABASE_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'savePromo', promo: promoData })
-          });
-
-          const result = await res.json();
+          const result = await postToDatabase({ action: 'savePromo', promo: promoData });
           if (result.success) {
             showToast('Kode Promo berhasil tersimpan di Google Sheets! 🎉');
             fetchPromosFromSpreadsheet();
@@ -581,18 +569,13 @@
         setAdminPromoModal({ open: false, item: null });
       };
 
-      // FUNGSI HAPUS PROMO DARI GOOGLE SHEETS
+      // FUNGSI HAPUS PROMO DARI ADMIN
       const handleDeletePromoItem = async (id) => {
         if (!confirm('Yakin ingin menghapus kode promo ini dari database?')) return;
         showToast('Menghapus dari Database...');
 
         try {
-          const res = await fetch(SCRIPT_DATABASE_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'deletePromo', id: id })
-          });
-
-          const result = await res.json();
+          const result = await postToDatabase({ action: 'deletePromo', id: id });
           if (result.success) {
             showToast('Kode Promo berhasil dihapus dari Google Sheets!');
             fetchPromosFromSpreadsheet();
