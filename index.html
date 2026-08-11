@@ -121,7 +121,6 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      // PROMO VOUCHER DIBACA MURNI DARI SPREADSHEET
       const [promosList, setPromosList] = useState([]);
       const [isLoadingPromos, setIsLoadingPromos] = useState(false);
 
@@ -149,7 +148,7 @@
 
       const [adminPromoModal, setAdminPromoModal] = useState({ open: false, item: null });
 
-      // READ PROMOS FROM GOOGLE SHEETS
+      // FETCH PROMO DARI SPREADSHEET (MURNI VALID JSON)
       const fetchPromosFromSpreadsheet = async () => {
         setIsLoadingPromos(true);
         try {
@@ -544,7 +543,7 @@
         showToast(`Berhasil menukarkan "${reward.name}"! Voucher tersimpan.`);
       };
 
-      // SAVE PROMO TO GOOGLE SHEETS
+      // FUNGSI SIMPAN PROMO KE GOOGLE SHEETS (VALID JSON PAYLOAD)
       const handleSavePromoItem = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -561,17 +560,12 @@
           discountAmount: type === 'fixed' ? val : 0
         };
 
-        showToast('Menyimpan ke Database Google Sheets...');
+        showToast('Menyimpan ke Google Sheets...');
         
         try {
-          const bodyData = new URLSearchParams();
-          bodyData.append('action', 'savePromo');
-          bodyData.append('data', JSON.stringify({ promo: promoData }));
-
           const res = await fetch(SCRIPT_DATABASE_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: bodyData.toString()
+            body: JSON.stringify({ action: 'savePromo', promo: promoData })
           });
 
           const result = await res.json();
@@ -587,20 +581,15 @@
         setAdminPromoModal({ open: false, item: null });
       };
 
-      // DELETE PROMO FROM GOOGLE SHEETS
+      // FUNGSI HAPUS PROMO DARI GOOGLE SHEETS
       const handleDeletePromoItem = async (id) => {
         if (!confirm('Yakin ingin menghapus kode promo ini dari database?')) return;
         showToast('Menghapus dari Database...');
 
         try {
-          const bodyData = new URLSearchParams();
-          bodyData.append('action', 'deletePromo');
-          bodyData.append('data', JSON.stringify({ id: id }));
-
           const res = await fetch(SCRIPT_DATABASE_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: bodyData.toString()
+            body: JSON.stringify({ action: 'deletePromo', id: id })
           });
 
           const result = await res.json();
@@ -787,6 +776,7 @@
                 {/* HALAMAN REWARD & KODE PROMO VOUCHER */}
                 {currentTab === 'reward' && (
                   <div className="space-y-6">
+                    {/* Banner Poin Member */}
                     <div className="bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                       <div>
                         <span className="text-xs text-amber-400 font-bold uppercase tracking-widest">Program Loyalitas Member</span>
@@ -989,7 +979,7 @@
                 </nav>
               </div>
             ) : (
-              /* DASHBOARD RAHASIA ADMIN (DIHUBUNGKAN KE SPREADSHEET) */
+              /* DASHBOARD RAHASIA ADMIN (TERHUBUNG KE SPREADSHEET) */
               <div className="space-y-6">
                 <div className="bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 flex items-center justify-between shadow-xl">
                   <div>
