@@ -77,19 +77,12 @@
       { id: 'm15', name: 'Jeruk peras', category: 'Fresh Drink', price: 15000, desc: 'Teh hibiscus diseduh dingin bersama potongan stroberi segar dan mint.', image: 'https://images.bukaolshop.com/hosting/38154/2eb01ccfbe56865906.png' },
     ];
 
-    // DAFTAR PROMO KODE VOUCHER
-    const INITIAL_PROMOS = [
-      { id: 'p1', title: 'Promo Diskon Kopi 20%', code: 'GOLD20', type: 'percent', discountPercent: 20, discountAmount: 0 },
-      { id: 'p2', title: 'Diskon Spesial Rp 10.000', code: 'SEDUH10K', type: 'fixed', discountPercent: 0, discountAmount: 10000 },
-      { id: 'p3', title: 'Potongan Hemat Rp 15.000', code: 'HEMAT15K', type: 'fixed', discountPercent: 0, discountAmount: 15000 },
-    ];
-
     // KATALOG REWARD POIN
     const INITIAL_REWARDS = [
-      
-      
-      { id: 'r3', name: 'Gantungan Kunci Tumbler lucu', points: 50000, type: 'Merchandise', desc: 'Edisi terbatas Ruang Seduh', discountAmount: 0 },
-      { id: 'r4', name: 'Cashback Rp 50.000 Diskon', points: 45000, type: 'Voucher Diskon', desc: 'Potongan langsung Rp 50.000', discountAmount: 50000 },
+      { id: 'r1', name: 'Voucher Diskon Rp 15.000', points: 15, type: 'Voucher Diskon', desc: 'Potongan harga Rp 15.000 saat checkout', discountAmount: 15000 },
+      { id: 'r2', name: 'Gratis 1 Ruang Seduh Latte', points: 35, type: 'Gratis Minuman', desc: 'Voucher potongan Rp 38.000 untuk Latte', discountAmount: 38000 },
+      { id: 'r3', name: 'Gantungan Kunci Tumbler Emas', points: 50, type: 'Merchandise', desc: 'Edisi terbatas Ruang Seduh', discountAmount: 0 },
+      { id: 'r4', name: 'Cashback Rp 50.000 Diskon', points: 45, type: 'Voucher Diskon', desc: 'Potongan langsung Rp 50.000', discountAmount: 50000 },
     ];
 
     const formatPhoneNumber = (phone) => {
@@ -128,10 +121,9 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      const [promosList, setPromosList] = useState(() => {
-        const saved = localStorage.getItem('rs_promos_list');
-        return saved ? JSON.parse(saved) : INITIAL_PROMOS;
-      });
+      // PROMO VOUCHER DARI DATABASE SPREADSHEET
+      const [promosList, setPromosList] = useState([]);
+      const [isLoadingPromos, setIsLoadingPromos] = useState(false);
 
       const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
       const [menuItems] = useState(INITIAL_MENU);
@@ -157,6 +149,29 @@
 
       const [adminPromoModal, setAdminPromoModal] = useState({ open: false, item: null });
 
+      // FETCH DATA PROMO DARI SPREADSHEET SAAT APLIKASI DIBUKA
+      const fetchPromosFromSpreadsheet = async () => {
+        setIsLoadingPromos(true);
+        try {
+          const res = await fetch(SCRIPT_DATABASE_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'getPromos' })
+          });
+          const result = await res.json();
+          if (result.success && Array.isArray(result.promos)) {
+            setPromosList(result.promos);
+          }
+        } catch (err) {
+          console.error('Gagal mengambil promo dari spreadsheet:', err);
+        } finally {
+          setIsLoadingPromos(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchPromosFromSpreadsheet();
+      }, []);
+
       useEffect(() => {
         if (currentUser) {
           localStorage.setItem('rs_current_user', JSON.stringify(currentUser));
@@ -168,10 +183,6 @@
       useEffect(() => {
         localStorage.setItem('rs_orders_list', JSON.stringify(orders));
       }, [orders]);
-
-      useEffect(() => {
-        localStorage.setItem('rs_promos_list', JSON.stringify(promosList));
-      }, [promosList]);
 
       const syncUserToSpreadsheet = async (updatedUser) => {
         try {
@@ -335,20 +346,18 @@
 
       const finalTotalAmount = useMemo(() => Math.max(0, subtotalCart - discountAmount), [subtotalCart, discountAmount]);
 
-      const handleApplyPromoCode = (codeToApply) => {
+      const handleApplyPromoCode = () => {
         if (!currentUser) {
           showToast('Silakan login terlebih dahulu untuk klaim kode promo!', 'error');
           return;
         }
 
-        const inputCode = codeToApply || promoInput;
-
-        if (!inputCode.trim()) {
+        if (!promoInput.trim()) {
           showToast('Masukkan kode promo terlebih dahulu', 'error');
           return;
         }
 
-        const codeUpper = inputCode.trim().toUpperCase();
+        const codeUpper = promoInput.trim().toUpperCase();
         const matchedPromo = promosList.find(p => p.code.toUpperCase() === codeUpper);
 
         if (!matchedPromo) {
@@ -538,14 +547,15 @@
         showToast(`Berhasil menukarkan "${reward.name}"! Voucher tersimpan.`);
       };
 
-      const handleSavePromoItem = (e) => {
+      // FUNGSI ADMIN EDIT/SIMPAN/HAPUS PROMO KE GOOGLE SHEETS
+      const handleSavePromoItem = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const code = formData.get('code').trim().toUpperCase();
         const type = formData.get('type');
         const val = Number(formData.get('val')) || 0;
 
-        const newPromo = {
+        const promoData = {
           id: adminPromoModal.item ? adminPromoModal.item.id : `p_${Date.now()}`,
           title: formData.get('title'),
           code: code,
@@ -554,19 +564,42 @@
           discountAmount: type === 'fixed' ? val : 0
         };
 
-        if (adminPromoModal.item) {
-          setPromosList(prev => prev.map(p => p.id === newPromo.id ? newPromo : p));
-          showToast('Kode Promo berhasil diperbarui');
-        } else {
-          setPromosList(prev => [...prev, newPromo]);
-          showToast('Kode Promo baru berhasil ditambahkan!');
+        showToast('Menyimpan ke Google Sheets...');
+        try {
+          const res = await fetch(SCRIPT_DATABASE_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'savePromo', promo: promoData })
+          });
+          const result = await res.json();
+          if (result.success) {
+            showToast('Kode Promo berhasil disimpan ke Database!');
+            fetchPromosFromSpreadsheet(); // Refresh promo list
+          } else {
+            showToast(result.message, 'error');
+          }
+        } catch (err) {
+          showToast('Gagal menyimpan promo ke database', 'error');
         }
         setAdminPromoModal({ open: false, item: null });
       };
 
-      const handleDeletePromoItem = (id) => {
-        setPromosList(prev => prev.filter(p => p.id !== id));
-        showToast('Kode Promo berhasil dihapus');
+      const handleDeletePromoItem = async (id) => {
+        showToast('Menghapus promo...');
+        try {
+          const res = await fetch(SCRIPT_DATABASE_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'deletePromo', id })
+          });
+          const result = await res.json();
+          if (result.success) {
+            showToast('Kode Promo berhasil dihapus!');
+            fetchPromosFromSpreadsheet();
+          } else {
+            showToast(result.message, 'error');
+          }
+        } catch (err) {
+          showToast('Gagal menghapus promo dari database', 'error');
+        }
       };
 
       return (
@@ -758,44 +791,51 @@
                       </div>
                     </div>
 
-                    {/* SEKSI 1: KODE PROMO AKTIF */}
+                    {/* SEKSI 1: KODE PROMO AKTIF (DARI GOOGLE SHEETS) */}
                     <div>
                       <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-amber-500" />
                         Kode Promo Diskon Aktif
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        {promosList.map(p => {
-                          const isUsed = currentUser?.usedPromoCodes?.includes(p.code.toUpperCase());
-                          return (
-                            <div key={p.id} className="bg-white dark:bg-slate-900 border border-amber-500/30 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3 relative overflow-hidden">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded uppercase font-mono">
-                                    {p.code}
-                                  </span>
-                                  <h4 className="font-bold text-sm mt-1.5">{p.title}</h4>
-                                </div>
-                                <span className="text-xs font-black text-[#0B8F5A]">
-                                  {p.type === 'percent' ? `Diskon ${p.discountPercent}%` : `Potongan Rp ${p.discountAmount.toLocaleString('id-ID')}`}
-                                </span>
-                              </div>
 
-                              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                                <span className="text-[10px] text-slate-400">
-                                  {isUsed ? '⚠️ Sudah Pernah Dipakai' : 'Maks 1x pakai per akun'}
-                                </span>
-                                <button 
-                                  onClick={() => copyToClipboard(p.code)}
-                                  className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 active:scale-95 transition"
-                                >
-                                  <Copy className="w-3.5 h-3.5" /> Salin Kode
-                                </button>
+                      {isLoadingPromos ? (
+                        <p className="text-xs text-slate-400 italic">Memuat kode promo dari database...</p>
+                      ) : promosList.length === 0 ? (
+                        <p className="text-xs text-slate-400 italic">Belum ada promo diskon aktif saat ini.</p>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {promosList.map(p => {
+                            const isUsed = currentUser?.usedPromoCodes?.includes(p.code.toUpperCase());
+                            return (
+                              <div key={p.id} className="bg-white dark:bg-slate-900 border border-amber-500/30 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3 relative overflow-hidden">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded uppercase font-mono">
+                                      {p.code}
+                                    </span>
+                                    <h4 className="font-bold text-sm mt-1.5">{p.title}</h4>
+                                  </div>
+                                  <span className="text-xs font-black text-[#0B8F5A]">
+                                    {p.type === 'percent' ? `Diskon ${p.discountPercent}%` : `Potongan Rp ${p.discountAmount.toLocaleString('id-ID')}`}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                                  <span className="text-[10px] text-slate-400">
+                                    {isUsed ? '⚠️ Sudah Pernah Dipakai' : 'Maks 1x pakai per akun'}
+                                  </span>
+                                  <button 
+                                    onClick={() => copyToClipboard(p.code)}
+                                    className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 active:scale-95 transition"
+                                  >
+                                    <Copy className="w-3.5 h-3.5" /> Salin Kode
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     {/* SEKSI 2: KATALOG POIN REWARD */}
@@ -937,7 +977,7 @@
                 </nav>
               </div>
             ) : (
-              /* DASHBOARD RAHASIA ADMIN */
+              /* DASHBOARD RAHASIA ADMIN (DIHUBUNGKAN KE SPREADSHEET) */
               <div className="space-y-6">
                 <div className="bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 flex items-center justify-between shadow-xl">
                   <div>
@@ -947,23 +987,27 @@
                   <button onClick={() => setAdminPromoModal({ open: true, item: null })} className="bg-[#0B8F5A] text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow"><Plus className="w-4 h-4" /> + Kode Promo Baru</button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {promosList.map(p => (
-                    <div key={p.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex justify-between items-center">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase text-amber-500 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded font-mono">KODE: {p.code}</span>
-                        <h4 className="font-bold text-sm mt-1">{p.title}</h4>
-                        <p className="text-xs font-extrabold text-[#0B8F5A] mt-0.5">
-                          {p.type === 'percent' ? `Diskon ${p.discountPercent}%` : `Potongan Rp ${p.discountAmount.toLocaleString('id-ID')}`}
-                        </p>
+                {isLoadingPromos ? (
+                  <p className="text-xs text-slate-400 italic">Memuat promo dari database...</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {promosList.map(p => (
+                      <div key={p.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase text-amber-500 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded font-mono">KODE: {p.code}</span>
+                          <h4 className="font-bold text-sm mt-1">{p.title}</h4>
+                          <p className="text-xs font-extrabold text-[#0B8F5A] mt-0.5">
+                            {p.type === 'percent' ? `Diskon ${p.discountPercent}%` : `Potongan Rp ${p.discountAmount.toLocaleString('id-ID')}`}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <button onClick={() => setAdminPromoModal({ open: true, item: p })} className="p-2 text-amber-500 font-bold text-xs">Edit</button>
+                          <button onClick={() => handleDeletePromoItem(p.id)} className="p-2 text-rose-500 font-bold text-xs">Hapus</button>
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        <button onClick={() => setAdminPromoModal({ open: true, item: p })} className="p-2 text-amber-500 font-bold text-xs">Edit</button>
-                        <button onClick={() => handleDeletePromoItem(p.id)} className="p-2 text-rose-500 font-bold text-xs">Hapus</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </main>
@@ -1111,7 +1155,7 @@
                               placeholder="MASUKKAN KODE PROMO (Cth: GOLD20)"
                               className="flex-1 bg-white dark:bg-slate-800 border dark:border-slate-700 p-2.5 rounded-xl text-xs font-mono uppercase outline-none focus:ring-2 focus:ring-[#0B8F5A]"
                             />
-                            <button onClick={() => handleApplyPromoCode()} className="bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-xs px-4 rounded-xl shadow">Gunakan</button>
+                            <button onClick={handleApplyPromoCode} className="bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-xs px-4 rounded-xl shadow">Gunakan</button>
                           </div>
                         )}
 
