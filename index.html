@@ -121,7 +121,7 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      // PROMO VOUCHER DARI DATABASE SPREADSHEET
+      // PROMO VOUCHER DIBACA MURNI DARI SPREADSHEET
       const [promosList, setPromosList] = useState([]);
       const [isLoadingPromos, setIsLoadingPromos] = useState(false);
 
@@ -149,14 +149,11 @@
 
       const [adminPromoModal, setAdminPromoModal] = useState({ open: false, item: null });
 
-      // FETCH DATA PROMO DARI SPREADSHEET SAAT APLIKASI DIBUKA
+      // READ PROMOS FROM GOOGLE SHEETS
       const fetchPromosFromSpreadsheet = async () => {
         setIsLoadingPromos(true);
         try {
-          const res = await fetch(SCRIPT_DATABASE_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'getPromos' })
-          });
+          const res = await fetch(SCRIPT_DATABASE_URL + '?action=getPromos');
           const result = await res.json();
           if (result.success && Array.isArray(result.promos)) {
             setPromosList(result.promos);
@@ -547,7 +544,7 @@
         showToast(`Berhasil menukarkan "${reward.name}"! Voucher tersimpan.`);
       };
 
-      // FUNGSI ADMIN EDIT/SIMPAN/HAPUS PROMO KE GOOGLE SHEETS
+      // SAVE PROMO TO GOOGLE SHEETS
       const handleSavePromoItem = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -564,16 +561,23 @@
           discountAmount: type === 'fixed' ? val : 0
         };
 
-        showToast('Menyimpan ke Google Sheets...');
+        showToast('Menyimpan ke Database Google Sheets...');
+        
         try {
+          const bodyData = new URLSearchParams();
+          bodyData.append('action', 'savePromo');
+          bodyData.append('data', JSON.stringify({ promo: promoData }));
+
           const res = await fetch(SCRIPT_DATABASE_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'savePromo', promo: promoData })
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyData.toString()
           });
+
           const result = await res.json();
           if (result.success) {
-            showToast('Kode Promo berhasil disimpan ke Database!');
-            fetchPromosFromSpreadsheet(); // Refresh promo list
+            showToast('Kode Promo berhasil tersimpan di Google Sheets! 🎉');
+            fetchPromosFromSpreadsheet();
           } else {
             showToast(result.message, 'error');
           }
@@ -583,16 +587,25 @@
         setAdminPromoModal({ open: false, item: null });
       };
 
+      // DELETE PROMO FROM GOOGLE SHEETS
       const handleDeletePromoItem = async (id) => {
-        showToast('Menghapus promo...');
+        if (!confirm('Yakin ingin menghapus kode promo ini dari database?')) return;
+        showToast('Menghapus dari Database...');
+
         try {
+          const bodyData = new URLSearchParams();
+          bodyData.append('action', 'deletePromo');
+          bodyData.append('data', JSON.stringify({ id: id }));
+
           const res = await fetch(SCRIPT_DATABASE_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'deletePromo', id })
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyData.toString()
           });
+
           const result = await res.json();
           if (result.success) {
-            showToast('Kode Promo berhasil dihapus!');
+            showToast('Kode Promo berhasil dihapus dari Google Sheets!');
             fetchPromosFromSpreadsheet();
           } else {
             showToast(result.message, 'error');
@@ -774,7 +787,6 @@
                 {/* HALAMAN REWARD & KODE PROMO VOUCHER */}
                 {currentTab === 'reward' && (
                   <div className="space-y-6">
-                    {/* Banner Poin Member */}
                     <div className="bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                       <div>
                         <span className="text-xs text-amber-400 font-bold uppercase tracking-widest">Program Loyalitas Member</span>
