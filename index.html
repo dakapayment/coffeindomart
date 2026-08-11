@@ -55,26 +55,20 @@
     const LogIn = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>);
     const UserCheck = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>);
     const Shield = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>);
+    const Copy = ({ className = "w-4 h-4" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>);
 
-    // INITIAL MENU TERBARU & TERUPDATE
+    // INITIAL MENU
     const INITIAL_MENU = [
-      // SIGNATURE
       { id: 'm16', name: 'Signature Macha Strawberi', category: 'Signature', price: 20000, desc: 'Resep macha creamy dengan sensasi stroberi segar.', image: 'https://images.bukaolshop.com/hosting/38154/9bfab6fae61d971132.png' },
-
-      // COFFEE
       { id: 'm1', name: 'Mocha Intenso', category: 'Coffee', price: 18000, desc: 'Perpaduan antara coklat premium dengan kopi robusta pilihan', image: 'https://images.bukaolshop.com/hosting/38154/08b5850b46db416355.png' },
       { id: 'm2', name: 'Kopi Gula Aren', category: 'Coffee', price: 15000, desc: 'Paduan espresso kaya rasa, susu creamy, dan gula aren organik spesial.', image: 'https://images.bukaolshop.com/hosting/38154/7962862d9d07489063.png' },
       { id: 'm3', name: 'Coffee Butterscotch', category: 'Coffee', price: 15000, desc: 'Coffee Butterscotch.', image: 'https://images.bukaolshop.com/hosting/38154/8dd5ab18c9b1471610.png' },
       { id: 'm9', name: 'Black Bee Coffee', category: 'Coffee', price: 15000, desc: 'Black Bee Coffee.', image: 'https://images.bukaolshop.com/hosting/38154/84a2312e5226802454.png' },
-      
-      // NON COFFEE
       { id: 'm4', name: 'Coklat Premium', category: 'Non Coffee', price: 15000, desc: 'Dengan ciri khas coklat yang kental.', image: 'https://images.bukaolshop.com/hosting/38154/3189ff5cacea207652.png' },
       { id: 'm5', name: 'Cookies & Cream', category: 'Non Coffee', price: 15000, desc: 'Varian cookies yang creamy.', image: 'https://images.bukaolshop.com/hosting/38154/e4258374150e997870.png' },
       { id: 'm8', name: 'Greantea', category: 'Non Coffee', price: 15000, desc: 'Resep teh creamyy.', image: 'https://images.bukaolshop.com/hosting/38154/e84da2567301199651.png' },
       { id: 'm10', name: 'Thaitea', category: 'Non Coffee', price: 15000, desc: 'Resep teh creamyy.', image: 'https://images.bukaolshop.com/hosting/38154/9ef179c7099c922953.png' },
       { id: 'm11', name: 'Macha', category: 'Non Coffee', price: 15000, desc: 'Resep macha creamy.', image: 'https://images.bukaolshop.com/hosting/38154/75fa7407927c282746.png' },
-      
-      // FRESH DRINK
       { id: 'm6', name: 'Sunkist ORI', category: 'Fresh Drink', price: 15000, desc: 'Perasan jeruk Yuzu asli, air soda, dan ekstrak bunga telang segar.', image: 'https://images.bukaolshop.com/hosting/38154/69be9192a3dd403218.png' },
       { id: 'm7', name: 'Sunkist Yakult', category: 'Fresh Drink', price: 15000, desc: 'Teh hibiscus diseduh dingin bersama potongan stroberi segar dan mint.', image: 'https://images.bukaolshop.com/hosting/38154/4b0a947fb743823248.png' },
       { id: 'm12', name: 'Sunkist Madu', category: 'Fresh Drink', price: 15000, desc: 'Teh hibiscus diseduh dingin bersama potongan stroberi segar dan mint.', image: 'https://images.bukaolshop.com/hosting/38154/9054a709a3ba416287.png' },
@@ -92,10 +86,10 @@
 
     // KATALOG REWARD POIN
     const INITIAL_REWARDS = [
-      { id: 'r1', name: 'Voucher Diskon Rp 15.000', points: 15, type: 'Voucher Diskon', desc: 'Potongan harga Rp 15.000 saat checkout', discountAmount: 15000 },
-      { id: 'r2', name: 'Gratis 1 Ruang Seduh Latte', points: 35, type: 'Gratis Minuman', desc: 'Voucher potongan Rp 38.000 untuk Latte', discountAmount: 38000 },
-      { id: 'r3', name: 'Gantungan Kunci Tumbler Emas', points: 50, type: 'Merchandise', desc: 'Edisi terbatas Ruang Seduh', discountAmount: 0 },
-      { id: 'r4', name: 'Cashback Rp 50.000 Diskon', points: 45, type: 'Voucher Diskon', desc: 'Potongan langsung Rp 50.000', discountAmount: 50000 },
+      
+      
+      { id: 'r3', name: 'Gantungan Kunci Tumbler lucu', points: 50000, type: 'Merchandise', desc: 'Edisi terbatas Ruang Seduh', discountAmount: 0 },
+      { id: 'r4', name: 'Cashback Rp 50.000 Diskon', points: 45000, type: 'Voucher Diskon', desc: 'Potongan langsung Rp 50.000', discountAmount: 50000 },
     ];
 
     const formatPhoneNumber = (phone) => {
@@ -341,18 +335,20 @@
 
       const finalTotalAmount = useMemo(() => Math.max(0, subtotalCart - discountAmount), [subtotalCart, discountAmount]);
 
-      const handleApplyPromoCode = () => {
+      const handleApplyPromoCode = (codeToApply) => {
         if (!currentUser) {
           showToast('Silakan login terlebih dahulu untuk klaim kode promo!', 'error');
           return;
         }
 
-        if (!promoInput.trim()) {
+        const inputCode = codeToApply || promoInput;
+
+        if (!inputCode.trim()) {
           showToast('Masukkan kode promo terlebih dahulu', 'error');
           return;
         }
 
-        const codeUpper = promoInput.trim().toUpperCase();
+        const codeUpper = inputCode.trim().toUpperCase();
         const matchedPromo = promosList.find(p => p.code.toUpperCase() === codeUpper);
 
         if (!matchedPromo) {
@@ -380,6 +376,11 @@
         setPromoInput('');
         setShowVoucherSelector(false);
         showToast(`Kode Promo "${matchedPromo.code}" Berhasil Dipasang! 🎉`);
+      };
+
+      const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text);
+        showToast(`Kode promo "${text}" berhasil disalin!`);
       };
 
       const sendTelegramNotification = async (order) => {
@@ -737,8 +738,10 @@
                   </div>
                 )}
 
+                {/* HALAMAN REWARD & KODE PROMO VOUCHER */}
                 {currentTab === 'reward' && (
                   <div className="space-y-6">
+                    {/* Banner Poin Member */}
                     <div className="bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                       <div>
                         <span className="text-xs text-amber-400 font-bold uppercase tracking-widest">Program Loyalitas Member</span>
@@ -755,27 +758,74 @@
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {INITIAL_REWARDS.map(reward => {
-                        const isEnough = currentUser && currentUser.points >= reward.points;
-                        return (
-                          <div key={reward.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold"><Gift className="w-6 h-6" /></div>
-                              <div>
-                                <span className="text-[10px] font-bold uppercase text-slate-400">{reward.type}</span>
-                                <h4 className="font-bold text-sm leading-snug">{reward.name}</h4>
-                                <p className="text-xs text-slate-500 mt-0.5">{reward.desc}</p>
-                                <span className="inline-block mt-2 text-xs font-black text-[#0B8F5A] bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded">{reward.points} Poin</span>
+                    {/* SEKSI 1: KODE PROMO AKTIF */}
+                    <div>
+                      <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-amber-500" />
+                        Kode Promo Diskon Aktif
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {promosList.map(p => {
+                          const isUsed = currentUser?.usedPromoCodes?.includes(p.code.toUpperCase());
+                          return (
+                            <div key={p.id} className="bg-white dark:bg-slate-900 border border-amber-500/30 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3 relative overflow-hidden">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded uppercase font-mono">
+                                    {p.code}
+                                  </span>
+                                  <h4 className="font-bold text-sm mt-1.5">{p.title}</h4>
+                                </div>
+                                <span className="text-xs font-black text-[#0B8F5A]">
+                                  {p.type === 'percent' ? `Diskon ${p.discountPercent}%` : `Potongan Rp ${p.discountAmount.toLocaleString('id-ID')}`}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <span className="text-[10px] text-slate-400">
+                                  {isUsed ? '⚠️ Sudah Pernah Dipakai' : 'Maks 1x pakai per akun'}
+                                </span>
+                                <button 
+                                  onClick={() => copyToClipboard(p.code)}
+                                  className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 active:scale-95 transition"
+                                >
+                                  <Copy className="w-3.5 h-3.5" /> Salin Kode
+                                </button>
                               </div>
                             </div>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                            <button onClick={() => handleRedeemReward(reward)} disabled={!isEnough} className={`px-4 py-2 rounded-xl font-bold text-xs shadow transition ${isEnough ? 'bg-amber-500 text-slate-900' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
-                              {isEnough ? 'Tukar Hadiah' : 'Poin Kurang'}
-                            </button>
-                          </div>
-                        );
-                      })}
+                    {/* SEKSI 2: KATALOG POIN REWARD */}
+                    <div>
+                      <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                        <Gift className="w-5 h-5 text-[#0B8F5A]" />
+                        Katalog Penukaran Poin Reward
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {INITIAL_REWARDS.map(reward => {
+                          const isEnough = currentUser && currentUser.points >= reward.points;
+                          return (
+                            <div key={reward.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold"><Gift className="w-6 h-6" /></div>
+                                <div>
+                                  <span className="text-[10px] font-bold uppercase text-slate-400">{reward.type}</span>
+                                  <h4 className="font-bold text-sm leading-snug">{reward.name}</h4>
+                                  <p className="text-xs text-slate-500 mt-0.5">{reward.desc}</p>
+                                  <span className="inline-block mt-2 text-xs font-black text-[#0B8F5A] bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded">{reward.points} Poin</span>
+                                </div>
+                              </div>
+
+                              <button onClick={() => handleRedeemReward(reward)} disabled={!isEnough} className={`px-4 py-2 rounded-xl font-bold text-xs shadow transition ${isEnough ? 'bg-amber-500 text-slate-900' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                                {isEnough ? 'Tukar Hadiah' : 'Poin Kurang'}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1061,7 +1111,7 @@
                               placeholder="MASUKKAN KODE PROMO (Cth: GOLD20)"
                               className="flex-1 bg-white dark:bg-slate-800 border dark:border-slate-700 p-2.5 rounded-xl text-xs font-mono uppercase outline-none focus:ring-2 focus:ring-[#0B8F5A]"
                             />
-                            <button onClick={handleApplyPromoCode} className="bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-xs px-4 rounded-xl shadow">Gunakan</button>
+                            <button onClick={() => handleApplyPromoCode()} className="bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-xs px-4 rounded-xl shadow">Gunakan</button>
                           </div>
                         )}
 
