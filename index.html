@@ -168,8 +168,6 @@
       }
     ];
 
-    // Lokasi Pusat Ruang Seduh: Bukit Garam, Jl. Expan Sumatera, Bukit Lembah Subur, Kec. Kerumutan, Kab. Pelalawan, Riau
-    // Google Maps: https://maps.app.goo.gl/UVvjNL2rj9R5aUbJA
     const DEFAULT_STORE_LOCATION = {
       name: 'Ruang Seduh - Bukit Garam, Kerumutan',
       lat: -0.0882,
@@ -177,7 +175,6 @@
       mapsUrl: 'https://maps.app.goo.gl/UVvjNL2rj9R5aUbJA'
     };
 
-    // Hitung jarak Haversine presisi tinggi (dalam km, 2 angka di belakang koma)
     const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
       const toRad = (v) => (v * Math.PI) / 180;
       const R = 6371;
@@ -189,11 +186,10 @@
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       const exactKm = R * c;
-      if (exactKm < 0.05) return 0; // Di lokasi kedai (< 50 meter) = 0 km
+      if (exactKm < 0.05) return 0;
       return Math.round(exactKm * 100) / 100;
     };
 
-    // Hitung Ongkos Kirim: <= 1 km GRATIS (Rp 0), > 1 km = Rp 5.000 per km
     const calculateShippingCost = (distanceKm) => {
       const km = Number(distanceKm) || 0;
       if (km <= 1) return 0;
@@ -444,7 +440,6 @@
         localStorage.setItem('rs_saldo_fisik_terakhir', String(saldoFisikTerakhir));
       }, [saldoFisikTerakhir]);
 
-      // Ambil Seluruh Data POS & Sheet Mutasi Kas Langsung dari Google Sheets
       const fetchAllDataFromSpreadsheet = async (showNotification = false) => {
         setIsSyncingSheets(true);
         setIsLoadingPromos(true);
@@ -598,7 +593,6 @@
         setTimeout(() => setNotification(null), 3800);
       };
 
-      // Kalibrasi Titik GPS Kedai secara Presisi (untuk Owner/Kasir saat di kedai)
       const handleCalibrateStoreLocation = () => {
         if (!navigator.geolocation) {
           showToast('Perangkat/browser tidak mendukung GPS.', 'error');
@@ -627,7 +621,6 @@
         );
       };
 
-      // Deteksi GPS Lokasi Pembeli untuk menghitung jarak ke Ruang Seduh
       const handleDetectCustomerLocation = () => {
         if (!navigator.geolocation) {
           showToast('Browser tidak mendukung GPS otomatis. Silakan geser jarak (km) secara manual.', 'error');
@@ -689,7 +682,6 @@
         }
       };
 
-      // Voice Order Parser
       const parseVoiceOrder = (spokenText) => {
         const lower = spokenText.toLowerCase();
         let matchesFound = 0;
@@ -841,7 +833,6 @@
         return Math.max(0, (posCashReceived || posFinalTotal) - posFinalTotal);
       }, [posCashReceived, posFinalTotal, posPaymentMethod]);
 
-      // Helper sanitasi teks untuk Telegram Markdown
       const escapeTgMarkdown = (str) => {
         return String(str || '').replace(/[_*[\]()~`>#+\-=|{}.!]/g, ' ');
       };
@@ -2727,6 +2718,16 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                         Klik <strong>"Kunci Titik Kedai Sekarang"</strong> saat berada di kedai Ruang Seduh agar pembacaan jarak GPS pembeli presisi (0 km saat di kedai).
                       </p>
                     </div>
+
+                    {/* KAS UTAMA & BRANKAS OWNER */}
+                    <div className="bg-white text-slate-800 rounded-3xl p-6 border border-blue-200 shadow-xl space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1565c0] flex items-center justify-center font-bold">💰</div>
+                          <div>
+                            <span className="text-xs font-black uppercase text-[#1565c0]">Kas Utama & Brankas Owner</span>
+                            <p className="text-[10px] text-slate-500">Uang Operasional & Setoran Kedai ({kasPeriod})</p>
+                          </div>
                         </div>
                         <span className="text-xs font-bold bg-blue-50 text-[#1565c0] px-3 py-1 rounded-full border border-blue-200">Owner</span>
                       </div>
