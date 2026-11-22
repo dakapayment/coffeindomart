@@ -170,14 +170,14 @@
 
     // Lokasi Pusat Ruang Seduh: Bukit Garam, Jl. Expan Sumatera, Bukit Lembah Subur, Kec. Kerumutan, Kab. Pelalawan, Riau
     // Google Maps: https://maps.app.goo.gl/UVvjNL2rj9R5aUbJA
-    const STORE_LOCATION = {
+    const DEFAULT_STORE_LOCATION = {
       name: 'Ruang Seduh - Bukit Garam, Kerumutan',
-      lat: -0.0611758,
-      lng: 102.2917466,
+      lat: -0.0882,
+      lng: 102.2917,
       mapsUrl: 'https://maps.app.goo.gl/UVvjNL2rj9R5aUbJA'
     };
 
-    // Hitung jarak Haversine (km) dengan faktor koreksi jalan darat (1.2x)
+    // Hitung jarak Haversine presisi tinggi (dalam km, 2 angka di belakang koma)
     const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
       const toRad = (v) => (v * Math.PI) / 180;
       const R = 6371;
@@ -188,11 +188,12 @@
         Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const straightKm = R * c;
-      return Math.round(straightKm * 1.2 * 10) / 10;
+      const exactKm = R * c;
+      if (exactKm < 0.05) return 0; // Di lokasi kedai (< 50 meter) = 0 km
+      return Math.round(exactKm * 100) / 100;
     };
 
-    // Hitung Ongkos Kirim: <= 1 km GRATIS (Rp 0), > 1 km = Rp 5.000 per km (pembulatan ke atas per km)
+    // Hitung Ongkos Kirim: <= 1 km GRATIS (Rp 0), > 1 km = Rp 5.000 per km
     const calculateShippingCost = (distanceKm) => {
       const km = Number(distanceKm) || 0;
       if (km <= 1) return 0;
@@ -342,6 +343,16 @@
         return localStorage.getItem('rs_home_banner_url') || '';
       });
       const [activeBannerIdx, setActiveBannerIdx] = useState(0);
+
+      // Koordinat Lokasi Pusat Kedai (Bisa dikalibrasi 1-klik saat berada di kedai)
+      const [storeLocation, setStoreLocation] = useState(() => {
+        const saved = localStorage.getItem('rs_store_location');
+        if (saved) {
+          try { return JSON.parse(saved); } catch (e) {}
+        }
+        return DEFAULT_STORE_LOCATION;
+      });
+      const [isCalibratingStore, setIsCalibratingStore] = useState(false);
 
       // Promos
       const [promosList, setPromosList] = useState([]);
@@ -587,6 +598,35 @@
         setTimeout(() => setNotification(null), 3800);
       };
 
+      // Kalibrasi Titik GPS Kedai secara Presisi (untuk Owner/Kasir saat di kedai)
+      const handleCalibrateStoreLocation = () => {
+        if (!navigator.geolocation) {
+          showToast('Perangkat/browser tidak mendukung GPS.', 'error');
+          return;
+        }
+        setIsCalibratingStore(true);
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude, accuracy } = pos.coords;
+            const updatedLoc = {
+              ...storeLocation,
+              lat: latitude,
+              lng: longitude,
+              accuracy: Math.round(accuracy || 0)
+            };
+            setStoreLocation(updatedLoc);
+            localStorage.setItem('rs_store_location', JSON.stringify(updatedLoc));
+            setIsCalibratingStore(false);
+            showToast(`Titik GPS Kedai dikunci presisi (${latitude.toFixed(6)}, ${longitude.toFixed(6)})! 📍`);
+          },
+          () => {
+            setIsCalibratingStore(false);
+            showToast('Gagal mengambil titik GPS. Pastikan izin lokasi aktif!', 'error');
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+      };
+
       // Deteksi GPS Lokasi Pembeli untuk menghitung jarak ke Ruang Seduh
       const handleDetectCustomerLocation = () => {
         if (!navigator.geolocation) {
@@ -598,8 +638,8 @@
           (pos) => {
             const { latitude, longitude } = pos.coords;
             const distKm = calculateDistanceKm(
-              STORE_LOCATION.lat,
-              STORE_LOCATION.lng,
+              storeLocation.lat,
+              storeLocation.lng,
               latitude,
               longitude
             );
@@ -608,14 +648,14 @@
             setIsDetectingLocation(false);
             const ongkir = calculateShippingCost(distKm);
             showToast(
-              `Jarak terdeteksi: ${distKm} km (${ongkir === 0 ? 'GRATIS Ongkir' : `Ongkir Rp ${ongkir.toLocaleString('id-ID')}`}) 📍`
+              `Jarak terdeteksi: ${distKm === 0 ? '0 km (Di Lokasi Kedai)' : `${distKm} km`} (${ongkir === 0 ? 'GRATIS Ongkir' : `Ongkir Rp ${ongkir.toLocaleString('id-ID')}`}) 📍`
             );
           },
           () => {
             setIsDetectingLocation(false);
             showToast('Izin lokasi GPS ditolak/gagal. Silakan pilih jarak (km) secara manual.', 'error');
           },
-          { enableHighAccuracy: true, timeout: 10000 }
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
       };
 
@@ -2634,15 +2674,59 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                       </div>
                     </div>
 
-                    {/* KAS UTAMA & BRANKAS OWNER */}
-                    <div className="bg-white text-slate-800 rounded-3xl p-6 border border-blue-200 shadow-xl space-y-4">
+                    {/* Kalibrasi Titik GPS Pusat Kedai (Presisi Tinggi untuk Ongkir) */}
+                    <div className="bg-white rounded-3xl p-4 border border-blue-200 shadow-sm space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-blue-500/15 text-[#1565c0] flex items-center justify-center font-bold">💰</div>
-                          <div>
-                            <span className="text-xs font-black uppercase text-[#1565c0]">Kas Utama & Brankas Owner</span>
-                            <p className="text-[10px] text-slate-500">Uang Operasional & Setoran Kedai ({kasPeriod})</p>
-                          </div>
+                        <div>
+                          <span className="text-xs font-extrabold text-slate-800 block">📍 Titik Koordinat Kedai (Cek Ongkir)</span>
+                          <span className="text-[10px] text-slate-500 font-mono">
+                            Lat: {Number(storeLocation.lat).toFixed(6)}, Lng: {Number(storeLocation.lng).toFixed(6)}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCalibrateStoreLocation}
+                          disabled={isCalibratingStore}
+                          className="bg-[#1565c0] hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-[11px] font-bold shadow-sm active:scale-95 transition"
+                        >
+                          {isCalibratingStore ? 'Mengunci GPS...' : '🎯 Kunci Titik Kedai Sekarang'}
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Latitude (Lintang)</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={storeLocation.lat}
+                            onChange={(e) => {
+                              const updated = { ...storeLocation, lat: parseFloat(e.target.value) || 0 };
+                              setStoreLocation(updated);
+                              localStorage.setItem('rs_store_location', JSON.stringify(updated));
+                            }}
+                            className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Longitude (Bujur)</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={storeLocation.lng}
+                            onChange={(e) => {
+                              const updated = { ...storeLocation, lng: parseFloat(e.target.value) || 0 };
+                              setStoreLocation(updated);
+                              localStorage.setItem('rs_store_location', JSON.stringify(updated));
+                            }}
+                            className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono outline-none"
+                          />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-400 leading-relaxed">
+                        Klik <strong>"Kunci Titik Kedai Sekarang"</strong> saat berada di kedai Ruang Seduh agar pembacaan jarak GPS pembeli presisi (0 km saat di kedai).
+                      </p>
+                    </div>
                         </div>
                         <span className="text-xs font-bold bg-blue-50 text-[#1565c0] px-3 py-1 rounded-full border border-blue-200">Owner</span>
                       </div>
@@ -3697,7 +3781,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                               <div>
                                 <span className="text-[11px] font-extrabold text-slate-800 block">Cek Ongkos Kirim</span>
                                 <span className="text-[10px] text-slate-400">
-                                  Dari {STORE_LOCATION.name} • ≤ 1 km Gratis, &gt; 1 km Rp 5.000/km
+                                  Dari {storeLocation.name} • ≤ 1 km Gratis, &gt; 1 km Rp 5.000/km
                                 </span>
                               </div>
                               <button
@@ -3717,7 +3801,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                               </div>
                               <input
                                 type="range"
-                                min="0.5"
+                                min="0"
                                 max="15"
                                 step="0.5"
                                 value={deliveryDistanceKm}
@@ -3725,7 +3809,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                                 className="w-full accent-[#1565c0] cursor-pointer"
                               />
                               <div className="flex justify-between text-[9px] text-slate-400">
-                                <span>0.5 km (Gratis)</span>
+                                <span>0 km (Gratis)</span>
                                 <span>1 km (Gratis)</span>
                                 <span>5 km (Rp 25rb)</span>
                                 <span>15 km</span>
@@ -3999,7 +4083,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                       </div>
                       <input
                         type="range"
-                        min="0.5"
+                        min="0"
                         max="15"
                         step="0.5"
                         value={deliveryDistanceKm}
