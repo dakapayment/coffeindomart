@@ -628,7 +628,7 @@
         }
         setIsDetectingLocation(true);
         navigator.geolocation.getCurrentPosition(
-          (pos) => {
+          async (pos) => {
             const { latitude, longitude } = pos.coords;
             const distKm = calculateDistanceKm(
               storeLocation.lat,
@@ -638,15 +638,39 @@
             );
             setCustomerCoords({ lat: latitude, lng: longitude });
             setDeliveryDistanceKm(distKm);
+
+            let resolvedAddress = '';
+            try {
+              const geoRes = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&accept-language=id`
+              );
+              const geoData = await geoRes.json();
+              if (geoData) {
+                const a = geoData.address || {};
+                const parts = [
+                  a.road || a.pedestrian || a.footway || a.neighbourhood || a.hamlet,
+                  a.village || a.suburb,
+                  a.city_district || a.town || a.city || a.county
+                ].filter(Boolean);
+                resolvedAddress = parts.length > 0 ? parts.join(', ') : (geoData.display_name || '');
+              }
+            } catch (e) {}
+
+            const coordTag = `GPS (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
+            const autoFilledAddress = resolvedAddress
+              ? `${resolvedAddress} [${coordTag}]`
+              : `Lokasi GPS: ${coordTag}`;
+
+            setDeliveryAddress(autoFilledAddress);
             setIsDetectingLocation(false);
             const ongkir = calculateShippingCost(distKm);
             showToast(
-              `Jarak terdeteksi: ${distKm === 0 ? '0 km (Di Lokasi Kedai)' : `${distKm} km`} (${ongkir === 0 ? 'GRATIS Ongkir' : `Ongkir Rp ${ongkir.toLocaleString('id-ID')}`}) 📍`
+              `Alamat & jarak otomatis terisi: ${distKm === 0 ? '0 km' : `${distKm} km`} (${ongkir === 0 ? 'GRATIS Ongkir' : `Ongkir Rp ${ongkir.toLocaleString('id-ID')}`}) 📍`
             );
           },
           () => {
             setIsDetectingLocation(false);
-            showToast('Izin lokasi GPS ditolak/gagal. Silakan pilih jarak (km) secara manual.', 'error');
+            showToast('Izin lokasi GPS ditolak/gagal. Silakan isi alamat & jarak (km) secara manual.', 'error');
           },
           { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
@@ -2498,9 +2522,14 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                                         </div>
                                       ))}
                                       {order.deliveryMethod === 'Diantar' && (
-                                        <div className="flex justify-between text-[#1565c0] font-semibold pt-1 border-t border-slate-200/70">
-                                          <span>🛵 Ongkir ({order.deliveryDistanceKm || 0} km)</span>
-                                          <span>{Number(order.shippingFee) > 0 ? `Rp ${Number(order.shippingFee).toLocaleString('id-ID')}` : 'GRATIS'}</span>
+                                        <div className="pt-1 border-t border-slate-200/70 space-y-0.5">
+                                          <div className="flex justify-between text-[#1565c0] font-semibold">
+                                            <span>🛵 Ongkir ({order.deliveryDistanceKm || 0} km)</span>
+                                            <span>{Number(order.shippingFee) > 0 ? `Rp ${Number(order.shippingFee).toLocaleString('id-ID')}` : 'GRATIS'}</span>
+                                          </div>
+                                          {order.deliveryAddress && (
+                                            <p className="text-[11px] text-slate-500">📍 {order.deliveryAddress}</p>
+                                          )}
                                         </div>
                                       )}
                                     </div>
@@ -3479,7 +3508,12 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                     <p>Kasir: {activeOrderReceipt.cashier || 'Kasir 1'}</p>
                     <p>Pelanggan: {activeOrderReceipt.customerName}</p>
                     {activeOrderReceipt.deliveryMethod && (
-                      <p>Layanan: {activeOrderReceipt.deliveryMethod}{activeOrderReceipt.deliveryMethod === 'Diantar' ? ` (${activeOrderReceipt.deliveryDistanceKm || 0} km)` : ''}</p>
+                      <>
+                        <p>Layanan: {activeOrderReceipt.deliveryMethod}{activeOrderReceipt.deliveryMethod === 'Diantar' ? ` (${activeOrderReceipt.deliveryDistanceKm || 0} km)` : ''}</p>
+                        {activeOrderReceipt.deliveryMethod === 'Diantar' && activeOrderReceipt.deliveryAddress && (
+                          <p className="text-[10px]">Alamat: {activeOrderReceipt.deliveryAddress}</p>
+                        )}
+                      </>
                     )}
                     <p>Metode: {activeOrderReceipt.paymentMethod} ({activeOrderReceipt.status})</p>
                   </div>
@@ -3768,14 +3802,14 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                               {deliveryMethod === 'Diantar' ? 'DIANTAR (Delivery)' : 'JEMPUT (Ambil di Kasir)'}
                             </p>
                             {deliveryMethod === 'Diantar' && (
-                              <p className="text-[11px] text-slate-500 truncate">
+                              <p className="text-[11px] text-slate-500 line-clamp-2">
                                 {deliveryAddress ? `Alamat: ${deliveryAddress}` : 'Alamat pengantaran belum diisi'}
                               </p>
                             )}
                           </div>
                         </div>
 
-                        {/* Cek Ongkos Kirim Khusus Pesan Diantar */}
+                        {/* Cek Ongkos Kirim & Alamat Patokan Khusus Pesan Diantar */}
                         {deliveryMethod === 'Diantar' && (
                           <div className="bg-white p-3 rounded-xl border border-blue-200/80 space-y-2.5">
                             <div className="flex items-center justify-between gap-2">
@@ -3793,6 +3827,19 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                               >
                                 {isDetectingLocation ? 'Mencari GPS...' : '📍 Cek Jarak GPS'}
                               </button>
+                            </div>
+
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-600 block mb-1">
+                                Alamat Lengkap & Patokan Rumah *
+                              </label>
+                              <textarea
+                                rows={2}
+                                value={deliveryAddress}
+                                onChange={(e) => setDeliveryAddress(e.target.value)}
+                                placeholder="Otomatis terisi dari GPS, tambahkan patokan (misal: depan masjid / pagar biru)..."
+                                className="w-full p-2 rounded-xl border border-slate-200 bg-slate-50 text-[11px] outline-none focus:ring-2 focus:ring-[#1565c0]"
+                              />
                             </div>
 
                             <div className="space-y-1">
@@ -3968,7 +4015,15 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                       </div>
 
                       <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
-                        <span className="text-xs font-bold uppercase text-slate-500 block mb-1">Rincian Harga</span>
+                        <span className="text-xs font-bold uppercase text-slate-500 block mb-1">Rincian Harga & Pengantaran</span>
+                        {deliveryMethod === 'Diantar' && (
+                          <div className="bg-white p-2.5 rounded-xl border border-blue-100 text-[11px] space-y-0.5 mb-1">
+                            <span className="font-extrabold text-[#1565c0] block">📍 Alamat & Patokan Antar:</span>
+                            <p className="text-slate-600 leading-snug">
+                              {deliveryAddress.trim() || 'Belum diisi (silakan isi pada kolom alamat di atas)'}
+                            </p>
+                          </div>
+                        )}
                         <div className="flex justify-between text-xs"><span className="text-slate-500">Subtotal Menu</span><span className="font-bold">Rp {subtotalCart.toLocaleString('id-ID')}</span></div>
                         {deliveryMethod === 'Diantar' && (
                           <div className="flex justify-between text-xs">
@@ -4053,12 +4108,12 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                 {deliveryMethod === 'Diantar' && (
                   <div className="space-y-2.5 pt-1">
                     <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Alamat / Lokasi Pengantaran *</label>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Alamat / Lokasi & Patokan Rumah *</label>
                       <textarea
                         rows={2}
                         value={deliveryAddress}
                         onChange={(e) => setDeliveryAddress(e.target.value)}
-                        placeholder="Contoh: Jl. Expan Sumatera / Bukit Lembah Subur..."
+                        placeholder="Klik Gunakan Lokasi Saya untuk isi otomatis, atau ketik alamat & patokan..."
                         className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs outline-none focus:ring-2 focus:ring-[#1565c0]"
                       />
                     </div>
