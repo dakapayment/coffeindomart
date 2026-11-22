@@ -170,8 +170,8 @@
 
     const DEFAULT_STORE_LOCATION = {
       name: 'Ruang Seduh - Bukit Garam, Kerumutan',
-      lat: -0.0882,
-      lng: 102.2917,
+      lat: -0.0593781,
+      lng: 102.2748211,
       mapsUrl: 'https://maps.app.goo.gl/UVvjNL2rj9R5aUbJA'
     };
 
@@ -335,16 +335,21 @@
       const [productModal, setProductModal] = useState({ open: false, item: null });
 
       // Banner Image State (Editable via Admin / Custom URL)
+      const [activeBannerIdx, setActiveBannerIdx] = useState(0);
       const [customBannerUrl, setCustomBannerUrl] = useState(() => {
         return localStorage.getItem('rs_home_banner_url') || '';
       });
-      const [activeBannerIdx, setActiveBannerIdx] = useState(0);
 
-      // Koordinat Lokasi Pusat Kedai (Bisa dikalibrasi 1-klik saat berada di kedai)
+      // Koordinat Lokasi Pusat Kedai (Terkunci Permanen sesuai Titik GPS Kedai)
       const [storeLocation, setStoreLocation] = useState(() => {
         const saved = localStorage.getItem('rs_store_location');
         if (saved) {
-          try { return JSON.parse(saved); } catch (e) {}
+          try {
+            const parsed = JSON.parse(saved);
+            if (parsed && typeof parsed.lat === 'number' && typeof parsed.lng === 'number' && parsed.lat !== -0.0882) {
+              return parsed;
+            }
+          } catch (e) {}
         }
         return DEFAULT_STORE_LOCATION;
       });
@@ -3823,7 +3828,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                                 type="button"
                                 onClick={handleDetectCustomerLocation}
                                 disabled={isDetectingLocation}
-                                className="bg-[#1565c0] hover:bg-blue-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-sm shrink-0 active:scale-95 transition"
+                                className="bg-[#1565c0] hover:bg-blue-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm shrink-0 active:scale-95 transition"
                               >
                                 {isDetectingLocation ? 'Mencari GPS...' : '📍 Cek Jarak GPS'}
                               </button>
