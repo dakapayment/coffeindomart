@@ -97,6 +97,30 @@
       </svg>
     );
 
+    const LOADING_GIF_URL = 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXh6aG43ZWx6Z25xNzB6cW5iM3p5OGh3ZzF6NnJ5eXh0OWg0Y3c1aiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3oEjI6SIIHBdRxXI40/giphy.gif';
+
+    const LoadingSpinnerGif = ({ className = "w-5 h-5", text = "" }) => {
+      const [imgFailed, setImgFailed] = useState(false);
+      return (
+        <span className="inline-flex items-center justify-center gap-2">
+          {!imgFailed ? (
+            <img
+              src={LOADING_GIF_URL}
+              alt="Loading..."
+              onError={() => setImgFailed(true)}
+              className={`${className} object-contain rounded-full shrink-0`}
+            />
+          ) : (
+            <svg className={`${className} animate-spin shrink-0`} viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3.5" />
+              <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          )}
+          {text && <span>{text}</span>}
+        </span>
+      );
+    };
+
     const INITIAL_MENU = [
       { id: 'm21', name: 'Kebab Daging', category: 'Cemilan', price: 15000, desc: 'Kebab hangat isi irisan daging sapi panggang gurih pilihan.', image: 'https://images.bukaolshop.com/hosting/38154/d223870bbc2a594156.png', stock: 30 },
       { id: 'm20', name: 'Kebab Ayam', category: 'Cemilan', price: 10000, desc: 'Kebab hangat isi potongan daging ayam berbumbu rempah & saus mayo.', image: 'https://images.bukaolshop.com/hosting/38154/19986bb6fc4e351553.png', stock: 35 },
@@ -124,12 +148,17 @@
       { id: 'm12', name: 'Sunkist Madu', category: 'Fresh Drink', price: 18000, desc: 'Jeruk sunkist asli dengan madu alami yang menyehatkan.', image: 'https://images.bukaolshop.com/hosting/38154/9054a709a3ba416287.png', stock: 25 },
       { id: 'm13', name: 'Lemonada fresca', category: 'Fresh Drink', price: 10000, desc: 'Minuman soda perasan lemon dingin segar.', image: 'https://images.bukaolshop.com/hosting/38154/c1d6d3508153784226.png', stock: 35 },
       { id: 'm14', name: 'Peach tea Sprite', category: 'Fresh Drink', price: 15000, desc: 'Aroma buah persik berpadu soda berkarbonasi.', image: 'https://images.bukaolshop.com/hosting/38154/2f7709ac229c539346.png', stock: 20 }
+      { id: 'm40', name: 'Signature Macha Cokelat', category: 'Signature', price: 18000, desc: 'Resep macha creamy dengan sensasi coklat manis.', image: 'https://images.bukaolshop.com/hosting/38154/376751ca57eb708311.png', stock: 402 },
+      
+
+
+      
     ];
 
     const INITIAL_REWARDS = [
       { id: 'r3', name: 'Gantungan Kunci Tumbler Lucu', points: 50000, type: 'Merchandise', desc: 'Edisi terbatas Ruang Seduh Official', discountAmount: 0 },
       { id: 'r4', name: 'Cashback Diskon Rp 50.000', points: 45000, type: 'Voucher Diskon', desc: 'Potongan langsung Rp 50.000 untuk transaksi apa saja', discountAmount: 50000 },
-      { id: 'r5', name: 'Voucher Kopi Aren Gratis', points: 15000, type: 'Voucher Minuman', desc: 'Nikmati 1 cup Kopi Gula Aren spesial cuma-cuma', discountAmount: 15000 }
+      { id: 'r5', name: 'Voucher Kopi Aren Gratis', points: 500, type: 'Voucher Minuman', desc: 'Nikmati 1 cup Kopi Gula Aren spesial cuma-cuma', discountAmount: 15000 }
     ];
 
     const EXISTING_MEMBERS = [
@@ -175,6 +204,38 @@
       mapsUrl: 'https://maps.app.goo.gl/UVvjNL2rj9R5aUbJA'
     };
 
+    const mergeMenuWithLocalOverrides = (baseList) => {
+      let customItems = [];
+      let deletedIds = [];
+      try {
+        const savedCustom = localStorage.getItem('rs_custom_menu_items');
+        if (savedCustom) customItems = JSON.parse(savedCustom) || [];
+      } catch (e) {}
+      try {
+        const savedDeleted = localStorage.getItem('rs_deleted_menu_ids');
+        if (savedDeleted) deletedIds = JSON.parse(savedDeleted) || [];
+      } catch (e) {}
+
+      const filteredBase = (Array.isArray(baseList) ? baseList : []).filter(
+        item => !deletedIds.includes(item.id)
+      );
+
+      const mergedMap = new Map();
+      filteredBase.forEach(item => mergedMap.set(item.id, item));
+
+      const newCustomToPrepend = [];
+      customItems.forEach(cItem => {
+        if (deletedIds.includes(cItem.id)) return;
+        if (mergedMap.has(cItem.id)) {
+          mergedMap.set(cItem.id, { ...mergedMap.get(cItem.id), ...cItem });
+        } else {
+          newCustomToPrepend.push(cItem);
+        }
+      });
+
+      return [...newCustomToPrepend, ...Array.from(mergedMap.values())];
+    };
+
     const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
       const toRad = (v) => (v * Math.PI) / 180;
       const R = 6371;
@@ -194,7 +255,7 @@
       const km = Number(distanceKm) || 0;
       if (km <= 1) return 0;
       const billableKm = Math.ceil(km);
-      return billableKm * 5000;
+      return billableKm * 1000;
     };
 
     const formatPhoneNumber = (phone) => {
@@ -327,9 +388,14 @@
       const [menuItems, setMenuItems] = useState(() => {
         const saved = localStorage.getItem('rs_menu_items');
         if (saved) {
-          try { return JSON.parse(saved); } catch (e) {}
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              return mergeMenuWithLocalOverrides(parsed);
+            }
+          } catch (e) {}
         }
-        return INITIAL_MENU;
+        return mergeMenuWithLocalOverrides(INITIAL_MENU);
       });
       const [isEditMode, setIsEditMode] = useState(false);
       const [productModal, setProductModal] = useState({ open: false, item: null });
@@ -463,7 +529,7 @@
           if (result && (result.success || Array.isArray(result.orders) || Array.isArray(result.menu))) {
             const menuData = result.menu || result.menuItems;
             if (Array.isArray(menuData) && menuData.length > 0) {
-              setMenuItems(menuData.map(m => ({
+              const normalizedSheetMenu = menuData.map(m => ({
                 id: m.id || `m_${Date.now()}_${Math.random()}`,
                 name: m.name || m.nama || 'Menu',
                 category: m.category || m.kategori || 'Coffee',
@@ -471,7 +537,10 @@
                 desc: m.desc || m.deskripsi || '',
                 image: m.image || m.gambar || 'https://images.bukaolshop.com/hosting/38154/08b5850b46db416355.png',
                 stock: Number(m.stock || m.stok || 40)
-              })));
+              }));
+              setMenuItems(mergeMenuWithLocalOverrides(normalizedSheetMenu));
+            } else {
+              setMenuItems(prev => mergeMenuWithLocalOverrides(prev));
             }
 
             if (Array.isArray(result.promos)) setPromosList(result.promos);
@@ -804,24 +873,56 @@
       };
 
       const handleSaveProduct = async (productData) => {
+        try {
+          const savedCustom = JSON.parse(localStorage.getItem('rs_custom_menu_items') || '[]');
+          const cIdx = savedCustom.findIndex(p => p.id === productData.id);
+          if (cIdx > -1) savedCustom[cIdx] = productData;
+          else savedCustom.unshift(productData);
+          localStorage.setItem('rs_custom_menu_items', JSON.stringify(savedCustom));
+
+          const savedDeleted = JSON.parse(localStorage.getItem('rs_deleted_menu_ids') || '[]');
+          if (savedDeleted.includes(productData.id)) {
+            localStorage.setItem('rs_deleted_menu_ids', JSON.stringify(savedDeleted.filter(id => id !== productData.id)));
+          }
+        } catch (e) {}
+
         setMenuItems(prev => {
           const idx = prev.findIndex(p => p.id === productData.id);
+          let nextList;
           if (idx > -1) {
-            const updated = [...prev];
-            updated[idx] = productData;
-            return updated;
+            nextList = [...prev];
+            nextList[idx] = productData;
+          } else {
+            nextList = [productData, ...prev];
           }
-          return [productData, ...prev];
+          localStorage.setItem('rs_menu_items', JSON.stringify(nextList));
+          return nextList;
         });
+
         setProductModal({ open: false, item: null });
-        showToast(`Menu "${productData.name}" berhasil disimpan! 🎉`);
+        showToast(`Menu "${productData.name}" tersimpan permanen! 🎉`);
         try {
           await postToDatabase({ action: 'saveMenuItem', item: productData });
         } catch (err) {}
       };
 
       const handleDeleteProduct = async (productId) => {
-        setMenuItems(prev => prev.filter(p => p.id !== productId));
+        try {
+          const savedCustom = JSON.parse(localStorage.getItem('rs_custom_menu_items') || '[]');
+          localStorage.setItem('rs_custom_menu_items', JSON.stringify(savedCustom.filter(p => p.id !== productId)));
+
+          const savedDeleted = JSON.parse(localStorage.getItem('rs_deleted_menu_ids') || '[]');
+          if (!savedDeleted.includes(productId)) {
+            savedDeleted.push(productId);
+            localStorage.setItem('rs_deleted_menu_ids', JSON.stringify(savedDeleted));
+          }
+        } catch (e) {}
+
+        setMenuItems(prev => {
+          const nextList = prev.filter(p => p.id !== productId);
+          localStorage.setItem('rs_menu_items', JSON.stringify(nextList));
+          return nextList;
+        });
         setProductModal({ open: false, item: null });
         showToast('Menu berhasil dihapus!');
         try {
@@ -862,15 +963,24 @@
         return Math.max(0, (posCashReceived || posFinalTotal) - posFinalTotal);
       }, [posCashReceived, posFinalTotal, posPaymentMethod]);
 
-      const escapeTgMarkdown = (str) => {
-        return String(str || '').replace(/[_*[\]()~`>#+\-=|{}.!]/g, ' ');
+      const escapeTgHtml = (str) => {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      };
+
+      const encodeStrictUri = (str) => {
+        return encodeURIComponent(str).replace(/[!'()*]/g, (c) => {
+          return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+        });
       };
 
       const sendTelegramNotification = async (order) => {
         if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
 
         const itemsText = order.items.map(item => (
-          `• *${item.qty}x ${escapeTgMarkdown(item.name)}*\n  _Gula: ${escapeTgMarkdown(item.sugarLevel || 'Normal')}_${item.notes ? `\n  _Catatan: ${escapeTgMarkdown(item.notes)}_` : ''}`
+          `• <b>${item.qty}x ${escapeTgHtml(item.name)}</b>\n  <i>Gula: ${escapeTgHtml(item.sugarLevel || 'Normal')}</i>${item.notes ? `\n  <i>Catatan: ${escapeTgHtml(item.notes)}</i>` : ''}`
         )).join('\n');
 
         const cleanPhone = String(order.customerPhone || '').replace(/[^0-9]/g, '');
@@ -902,45 +1012,45 @@
           `Total Tagihan: Rp ${order.totalAmount.toLocaleString('id-ID')}\n\n` +
           `Apakah pesanan di atas sudah benar Kak? Jika sudah sesuai, akan segera kami buatkan. Terima kasih!`;
 
-        const waFullUrl = `https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(waGreetingText)}`;
+        const waFullUrl = `https://wa.me/${waPhone}?text=${encodeStrictUri(waGreetingText)}`;
 
         const waLinkText = (order.source !== 'pos_kasir' && waPhone.length >= 9)
-          ? `\n*Chat WA Pelanggan:* [Klik Kirim Konfirmasi WA](${waFullUrl})`
+          ? `\n<b>Chat WA Pelanggan:</b> <a href="${waFullUrl}">Klik Kirim Konfirmasi WA</a>`
           : '';
 
         const headerTitle = order.source === 'pos_kasir'
-          ? `🚨 *PESANAN KASIR OFFLINE - RUANG SEDUH!* ☕`
+          ? `🚨 <b>PESANAN KASIR OFFLINE - RUANG SEDUH!</b> ☕`
           : (order.deliveryMethod === 'Diantar'
-              ? `🛵 *PESANAN BARU: ANTAR (DELIVERY)* ☕`
-              : `🏪 *PESANAN BARU: JEMPUT (AMBIL DI KASIR)* ☕`);
+              ? `🛵 <b>PESANAN BARU: ANTAR (DELIVERY)</b> ☕`
+              : `🏪 <b>PESANAN BARU: JEMPUT (AMBIL DI KASIR)</b> ☕`);
 
         const ongkirTgLabel = Number(order.shippingFee) > 0
           ? `Rp ${Number(order.shippingFee).toLocaleString('id-ID')} (${order.deliveryDistanceKm || 0} km)`
-          : `GRATIS (<= 1 km)`;
+          : `GRATIS (&lt;= 1 km)`;
 
         const deliveryDetailText = order.source !== 'pos_kasir'
-          ? `\n*Layanan:* *${order.deliveryMethod === 'Diantar' ? 'ANTAR (Delivery)' : 'JEMPUT (Ambil di Kasir)'}*` +
+          ? `\n<b>Layanan:</b> <b>${order.deliveryMethod === 'Diantar' ? 'ANTAR (Delivery)' : 'JEMPUT (Ambil di Kasir)'}</b>` +
             (order.deliveryMethod === 'Diantar'
-              ? `\n*Alamat Antar:* ${escapeTgMarkdown(order.deliveryAddress || '-')}` +
-                `\n*Jarak & Ongkir:* ${ongkirTgLabel}` +
-                (order.customerCoords ? `\n*Titik Lokasi Pembeli:* [Buka Google Maps](https://maps.google.com/?q=${order.customerCoords.lat},${order.customerCoords.lng})` : '')
+              ? `\n<b>Alamat Antar:</b> ${escapeTgHtml(order.deliveryAddress || '-')}` +
+                `\n<b>Jarak &amp; Ongkir:</b> ${ongkirTgLabel}` +
+                (order.customerCoords ? `\n<b>Titik Lokasi Pembeli:</b> <a href="https://maps.google.com/?q=${order.customerCoords.lat},${order.customerCoords.lng}">Buka Google Maps</a>` : '')
               : '')
           : '';
 
         const message = `${headerTitle}\n\n` +
-          `*No. Pesanan:* \`${order.orderNo}\`\n` +
-          `*Tipe:* ${order.source === 'pos_kasir' ? 'Kasir Offline' : 'Online Web Pelanggan'}${deliveryDetailText}\n` +
-          `*Nama:* ${escapeTgMarkdown(order.customerName)}\n` +
-          `*No. HP / ID:* ${order.customerPhone}${waLinkText}\n` +
-          `*Metode Bayar:* ${escapeTgMarkdown(order.paymentMethod)}\n\n` +
-          `*Detail Pesanan:*\n${itemsText}\n\n` +
+          `<b>No. Pesanan:</b> <code>${escapeTgHtml(order.orderNo)}</code>\n` +
+          `<b>Tipe:</b> ${order.source === 'pos_kasir' ? 'Kasir Offline' : 'Online Web Pelanggan'}${deliveryDetailText}\n` +
+          `<b>Nama:</b> ${escapeTgHtml(order.customerName)}\n` +
+          `<b>No. HP / ID:</b> ${escapeTgHtml(order.customerPhone)}${waLinkText}\n` +
+          `<b>Metode Bayar:</b> ${escapeTgHtml(order.paymentMethod)}\n\n` +
+          `<b>Detail Pesanan:</b>\n${itemsText}\n\n` +
           `-----------------------------------\n` +
-          `*Subtotal:* Rp ${order.subtotal.toLocaleString('id-ID')}\n` +
-          (order.deliveryMethod === 'Diantar' ? `*Ongkos Kirim:* ${Number(order.shippingFee) > 0 ? `Rp ${Number(order.shippingFee).toLocaleString('id-ID')}` : 'GRATIS (Rp 0)'}\n` : '') +
-          (order.discountAmount > 0 ? `*Diskon:* -Rp ${order.discountAmount.toLocaleString('id-ID')}\n` : '') +
-          `*TOTAL:* *Rp ${order.totalAmount.toLocaleString('id-ID')}*\n` +
+          `<b>Subtotal:</b> Rp ${order.subtotal.toLocaleString('id-ID')}\n` +
+          (order.deliveryMethod === 'Diantar' ? `<b>Ongkos Kirim:</b> ${Number(order.shippingFee) > 0 ? `Rp ${Number(order.shippingFee).toLocaleString('id-ID')}` : 'GRATIS (Rp 0)'}\n` : '') +
+          (order.discountAmount > 0 ? `<b>Diskon:</b> -Rp ${order.discountAmount.toLocaleString('id-ID')}\n` : '') +
+          `<b>TOTAL:</b> <b>Rp ${order.totalAmount.toLocaleString('id-ID')}</b>\n` +
           `-----------------------------------\n` +
-          `📌 *Status:* ${escapeTgMarkdown(order.status)}`;
+          `📌 <b>Status:</b> ${escapeTgHtml(order.status)}`;
 
         try {
           await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN.trim()}/sendMessage`, {
@@ -949,7 +1059,7 @@
             body: JSON.stringify({
               chat_id: TELEGRAM_CHAT_ID.trim(),
               text: message,
-              parse_mode: 'Markdown',
+              parse_mode: 'HTML',
               disable_web_page_preview: true
             })
           });
@@ -1577,9 +1687,9 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                   <button 
                     onClick={() => fetchAllDataFromSpreadsheet(true)} 
                     title="Sinkronkan Data & Mutasi Kas Sheets" 
-                    className={`p-2.5 rounded-xl border ${isSyncingSheets ? 'bg-blue-100 text-[#1565c0] border-blue-300 animate-spin' : 'bg-slate-100 border-slate-200 text-slate-600'}`}
+                    className={`p-2.5 rounded-xl border ${isSyncingSheets ? 'bg-blue-50 text-[#1565c0] border-blue-300' : 'bg-slate-100 border-slate-200 text-slate-600'}`}
                   >
-                    <RefreshCw className="w-5 h-5" />
+                    {isSyncingSheets ? <LoadingSpinnerGif className="w-5 h-5" /> : <RefreshCw className="w-5 h-5" />}
                   </button>
                 )}
 
@@ -2004,7 +2114,9 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                       </h3>
 
                       {isLoadingPromos ? (
-                        <p className="text-xs text-slate-400 italic">Memuat kode promo dari database...</p>
+                        <div className="py-4 flex items-center gap-2 text-xs font-bold text-[#1565c0]">
+                          <LoadingSpinnerGif className="w-6 h-6" text="Memuat kode promo dari database..." />
+                        </div>
                       ) : promosList.length === 0 ? (
                         <p className="text-xs text-slate-400 italic">Belum ada promo diskon aktif saat ini.</p>
                       ) : (
@@ -2225,10 +2337,16 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                       <div className="flex gap-2">
                         <button 
                           onClick={handleStartVoiceOrder} 
-                          className={`flex-1 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg transition ${isListeningVoice ? 'bg-rose-600 animate-pulse text-white' : 'bg-white hover:bg-blue-50 text-[#1565c0]'}`}
+                          className={`flex-1 py-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg transition ${isListeningVoice ? 'bg-rose-600 text-white' : 'bg-white hover:bg-blue-50 text-[#1565c0]'}`}
                         >
-                          <Mic className="w-4 h-4" />
-                          <span>{isListeningVoice ? 'Mendengarkan...' : 'Mulai Bicara'}</span>
+                          {isListeningVoice ? (
+                            <LoadingSpinnerGif className="w-5 h-5" text="Mendengarkan..." />
+                          ) : (
+                            <>
+                              <Mic className="w-4 h-4" />
+                              <span>Mulai Bicara</span>
+                            </>
+                          )}
                         </button>
                         <button 
                           onClick={() => parseVoiceOrder("aren 3 kebab daging 2 teh biasa 1")} 
@@ -2416,12 +2534,18 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                         title="Segarkan / Refresh Data Orderan dari Sheets"
                         className={`p-2.5 rounded-2xl border flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm text-xs font-bold ${
                           isSyncingSheets 
-                            ? 'bg-blue-100 text-[#1565c0] border-blue-300 animate-pulse' 
+                            ? 'bg-blue-50 text-[#1565c0] border-blue-300' 
                             : 'bg-white border-slate-200 text-[#1565c0] hover:bg-blue-50'
                         }`}
                       >
-                        <RefreshCw className={`w-4 h-4 ${isSyncingSheets ? 'animate-spin text-[#1565c0]' : 'text-[#1565c0]'}`} />
-                        <span className="hidden sm:inline">{isSyncingSheets ? 'Memuat...' : 'Refresh'}</span>
+                        {isSyncingSheets ? (
+                          <LoadingSpinnerGif className="w-5 h-5" text="Memuat..." />
+                        ) : (
+                          <>
+                            <RefreshCw className="w-4 h-4 text-[#1565c0]" />
+                            <span className="hidden sm:inline">Refresh</span>
+                          </>
+                        )}
                       </button>
                     </div>
 
@@ -2714,7 +2838,11 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                           disabled={isCalibratingStore}
                           className="bg-[#1565c0] hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-[11px] font-bold shadow-sm active:scale-95 transition"
                         >
-                          {isCalibratingStore ? 'Mengunci GPS...' : '🎯 Kunci Titik Kedai Sekarang'}
+                          {isCalibratingStore ? (
+                            <LoadingSpinnerGif className="w-4 h-4" text="Mengunci GPS..." />
+                          ) : (
+                            '🎯 Kunci Titik Kedai Sekarang'
+                          )}
                         </button>
                       </div>
 
@@ -2826,8 +2954,12 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                         <button onClick={handleOpenShiftModal} className="bg-[#1565c0] hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold text-xs shadow flex items-center justify-center gap-1.5">
                           <RefreshCw className="w-4 h-4" /> Buka / Rekap Shift
                         </button>
-                        <button onClick={() => fetchAllDataFromSpreadsheet(true)} className="bg-blue-50 hover:bg-blue-100 text-[#1565c0] py-2.5 rounded-xl font-bold text-xs border border-blue-200 flex items-center justify-center gap-1.5">
-                          📋 Sinkronkan Sheets
+                        <button onClick={() => fetchAllDataFromSpreadsheet(true)} disabled={isSyncingSheets} className="bg-blue-50 hover:bg-blue-100 text-[#1565c0] py-2.5 rounded-xl font-bold text-xs border border-blue-200 flex items-center justify-center gap-1.5">
+                          {isSyncingSheets ? (
+                            <LoadingSpinnerGif className="w-5 h-5" text="Menyinkronkan..." />
+                          ) : (
+                            '📋 Sinkronkan Sheets'
+                          )}
                         </button>
                       </div>
 
@@ -2849,8 +2981,14 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                           disabled={isCleaningDuplicates}
                           className="w-full bg-blue-50 hover:bg-blue-100 text-[#1565c0] py-2.5 px-3 rounded-2xl font-bold text-xs border border-blue-200 flex items-center justify-center gap-2 transition active:scale-95 shadow-sm"
                         >
-                          <Sparkles className="w-4 h-4 text-[#1565c0]" />
-                          <span>{isCleaningDuplicates ? 'Merapikan Database...' : '🧹 Bersihkan Data Member Ganda di Spreadsheet'}</span>
+                          {isCleaningDuplicates ? (
+                            <LoadingSpinnerGif className="w-5 h-5" text="Merapikan Database..." />
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 text-[#1565c0]" />
+                              <span>🧹 Bersihkan Data Member Ganda di Spreadsheet</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -3706,7 +3844,11 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                 </div>
 
                 <button type="submit" disabled={isLoadingAuth} className="w-full bg-[#1565c0] text-white py-3.5 rounded-xl font-bold text-xs shadow-lg transition flex justify-center items-center gap-2">
-                  {isLoadingAuth ? 'Memproses...' : (authMode === 'login' ? 'Masuk Sesi' : 'Daftar & Dapatkan +100 Poin')}
+                  {isLoadingAuth ? (
+                    <LoadingSpinnerGif className="w-5 h-5" text="Memproses..." />
+                  ) : (
+                    authMode === 'login' ? 'Masuk Sesi' : 'Daftar & Dapatkan +100 Poin'
+                  )}
                 </button>
 
                 <div className="text-center pt-2">
@@ -3821,7 +3963,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                               <div>
                                 <span className="text-[11px] font-extrabold text-slate-800 block">Cek Ongkos Kirim</span>
                                 <span className="text-[10px] text-slate-400">
-                                  Dari {storeLocation.name} • ≤ 1 km Gratis, &gt; 1 km Rp 5.000/km
+                                  Dari {storeLocation.name} • ≤ 1 km Gratis, &gt; 1 km Rp 1.000/km
                                 </span>
                               </div>
                               <button
@@ -3830,7 +3972,11 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                                 disabled={isDetectingLocation}
                                 className="bg-[#1565c0] hover:bg-blue-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm shrink-0 active:scale-95 transition"
                               >
-                                {isDetectingLocation ? 'Mencari GPS...' : '📍 Cek Jarak GPS'}
+                                {isDetectingLocation ? (
+                                  <LoadingSpinnerGif className="w-4 h-4" text="Mencari GPS..." />
+                                ) : (
+                                  '📍 Cek Jarak GPS'
+                                )}
                               </button>
                             </div>
 
@@ -3864,7 +4010,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                               <div className="flex justify-between text-[9px] text-slate-400">
                                 <span>0 km (Gratis)</span>
                                 <span>1 km (Gratis)</span>
-                                <span>5 km (Rp 25rb)</span>
+                                <span>5 km (Rp 5rb)</span>
                                 <span>15 km</span>
                               </div>
                             </div>
@@ -3877,7 +4023,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                                 </span>
                               ) : (
                                 <span className="font-black text-[#1565c0]">
-                                  Rp {shippingFee.toLocaleString('id-ID')} ({Math.ceil(deliveryDistanceKm)} km × Rp 5.000)
+                                  Rp {shippingFee.toLocaleString('id-ID')} ({Math.ceil(deliveryDistanceKm)} km × Rp 1.000)
                                 </span>
                               )}
                             </div>
@@ -4132,7 +4278,11 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                           disabled={isDetectingLocation}
                           className="bg-[#1565c0] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm"
                         >
-                          {isDetectingLocation ? 'Mencari GPS...' : '📍 Gunakan Lokasi Saya'}
+                          {isDetectingLocation ? (
+                            <LoadingSpinnerGif className="w-4 h-4" text="Mencari GPS..." />
+                          ) : (
+                            '📍 Gunakan Lokasi Saya'
+                          )}
                         </button>
                       </div>
 
