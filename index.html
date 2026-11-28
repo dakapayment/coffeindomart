@@ -64,7 +64,6 @@
     const Plus = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>);
     const Minus = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>);
     const Sun = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>);
-    const Moon = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>);
     const ChevronRight = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>);
     const Gift = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>);
     const ShoppingCart = ({ className = "w-5 h-5" }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>);
@@ -129,7 +128,7 @@
       { id: 'm19', name: 'Macha Latte (Ori)', category: 'Signature', price: 15000, desc: 'Resep macha murni creamy otentik.', image: 'https://images.bukaolshop.com/hosting/38154/235350793d64335365.png', stock: 40 },
       { id: 'm15', name: 'Jeruk peras', category: 'Fresh Drink', price: 10000, desc: 'Jeruk peras murni tradisional dengan es batu.', image: 'https://images.bukaolshop.com/hosting/38154/2eb01ccfbe56865906.png', stock: 40 },
       { id: 'm16', name: 'Signature Macha Strawberi', category: 'Signature', price: 18000, desc: 'Resep macha creamy dengan sensasi stroberi segar.', image: 'https://images.bukaolshop.com/hosting/38154/9bfab6fae61d971132.png', stock: 42 },
-       { id: 'm35', name: 'Signature Macha Cokelat', category: 'Signature', price: 18000, desc: 'Resep macha creamy dengan sensasi manis segar.', image: 'https://images.bukaolshop.com/hosting/38154/376751ca57eb708311.png', stock: 42 },
+      { id: 'm35', name: 'Signature Macha Cokelat', category: 'Signature', price: 18000, desc: 'Resep macha creamy dengan sensasi manis segar.', image: 'https://images.bukaolshop.com/hosting/38154/376751ca57eb708311.png', stock: 42 },
       { id: 'm17', name: 'Signature Macha Oreo', category: 'Signature', price: 18000, desc: 'Resep macha creamy dengan taburan oreo renyah.', image: 'https://images.bukaolshop.com/hosting/38154/a60514717565193799.png', stock: 46 },
       { id: 'm18', name: 'Signature Macha Caramel', category: 'Signature', price: 18000, desc: 'Resep macha creamy dengan sirup karamel gurih.', image: 'https://images.bukaolshop.com/hosting/38154/9f704fc0ca29938403.png', stock: 38 },
       { id: 'm1', name: 'Mocha Intenso', category: 'Coffee', price: 15000, desc: 'Perpaduan coklat premium dengan kopi robusta pilihan.', image: 'https://images.bukaolshop.com/hosting/38154/08b5850b46db416355.png', stock: 50 },
@@ -200,6 +199,38 @@
       mapsUrl: 'https://maps.app.goo.gl/UVvjNL2rj9R5aUbJA'
     };
 
+    const DEFAULT_STORE_HOURS = {
+      openTime: '09:00',
+      closeTime: '22:00',
+      overrideMode: 'auto', // 'auto' | 'open' | 'closed'
+      closedMessage: 'Maaf, kedai Ruang Seduh sedang tutup. Silakan pesan kembali pada jam operasional kami.',
+      updatedAt: 0
+    };
+
+    const STORE_HOURS_SYS_ID = 'SYS_STORE_HOURS';
+    const STORE_HOURS_SYS_CODE = 'SYSSTOREHOURS';
+
+    const checkStoreOpenStatus = (hoursConfig) => {
+      const cfg = hoursConfig || DEFAULT_STORE_HOURS;
+      if (cfg.overrideMode === 'open') return true;
+      if (cfg.overrideMode === 'closed') return false;
+
+      const now = new Date();
+      const curMins = now.getHours() * 60 + now.getMinutes();
+      const [oH, oM] = String(cfg.openTime || '09:00').split(':').map(Number);
+      const [cH, cM] = String(cfg.closeTime || '22:00').split(':').map(Number);
+      const openMins = (isNaN(oH) ? 9 : oH) * 60 + (isNaN(oM) ? 0 : oM);
+      const closeMins = (isNaN(cH) ? 22 : cH) * 60 + (isNaN(cM) ? 0 : cM);
+
+      if (openMins === closeMins) return true;
+      if (closeMins > openMins) {
+        return curMins >= openMins && curMins < closeMins;
+      } else {
+        // Lewat tengah malam (misal 16:00 - 02:00)
+        return curMins >= openMins || curMins < closeMins;
+      }
+    };
+
     const mergeMenuWithLocalOverrides = (baseList) => {
       let customItems = [];
       let deletedIds = [];
@@ -213,7 +244,7 @@
       } catch (e) {}
 
       const filteredBase = (Array.isArray(baseList) ? baseList : []).filter(
-        item => !deletedIds.includes(item.id)
+        item => !deletedIds.includes(item.id) && item.id !== STORE_HOURS_SYS_ID
       );
 
       const mergedMap = new Map();
@@ -221,7 +252,7 @@
 
       const newCustomToPrepend = [];
       customItems.forEach(cItem => {
-        if (deletedIds.includes(cItem.id)) return;
+        if (deletedIds.includes(cItem.id) || cItem.id === STORE_HOURS_SYS_ID) return;
         if (mergedMap.has(cItem.id)) {
           mergedMap.set(cItem.id, { ...mergedMap.get(cItem.id), ...cItem });
         } else {
@@ -274,22 +305,110 @@
 
     const getLocalDateStr = (dateInput) => {
       if (!dateInput) return '';
-      if (typeof dateInput === 'string') {
-        const trimmed = dateInput.trim();
-        const isoMatch = trimmed.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-        if (isoMatch) {
-          return `${isoMatch[1]}-${String(isoMatch[2]).padStart(2, '0')}-${String(isoMatch[3]).padStart(2, '0')}`;
-        }
-        const dmyMatch = trimmed.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
-        if (dmyMatch) {
-          return `${dmyMatch[3]}-${String(dmyMatch[2]).padStart(2, '0')}-${String(dmyMatch[1]).padStart(2, '0')}`;
-        }
+      if (dateInput instanceof Date && !isNaN(dateInput.getTime())) {
+        return getISODateStr(dateInput);
       }
-      const d = new Date(dateInput);
+      const trimmed = String(dateInput).trim();
+      if (!trimmed) return '';
+
+      // Cek apakah format ISO UTC lengkap dengan waktu (misal: 2026-11-28T01:05:00.000Z) -> konversi ke zona waktu lokal perangkat
+      if (/^\d{4}-\d{2}-\d{2}T/.test(trimmed)) {
+        const dIso = new Date(trimmed);
+        if (!isNaN(dIso.getTime())) return getISODateStr(dIso);
+      }
+
+      // Format YYYY-MM-DD atau YYYY/MM/DD (tanpa waktu atau spasi)
+      const isoMatch = trimmed.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:\s|$)/);
+      if (isoMatch) {
+        return `${isoMatch[1]}-${String(isoMatch[2]).padStart(2, '0')}-${String(isoMatch[3]).padStart(2, '0')}`;
+      }
+
+      // Format DD/MM/YYYY atau MM/DD/YYYY
+      const slashMatch = trimmed.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      if (slashMatch) {
+        const p1 = Number(slashMatch[1]);
+        const p2 = Number(slashMatch[2]);
+        const yr = slashMatch[3];
+        // Jika angka pertama > 12 pasti DD/MM/YYYY, selain itu ikuti konvensi Indonesia DD/MM/YYYY kecuali p2 > 12 (MM/DD/YYYY)
+        if (p2 > 12) {
+          return `${yr}-${String(p1).padStart(2, '0')}-${String(p2).padStart(2, '0')}`;
+        }
+        return `${yr}-${String(p2).padStart(2, '0')}-${String(p1).padStart(2, '0')}`;
+      }
+
+      // Format bulan teks Indonesia/Inggris (misal: "28 Nov 2026" atau "28 November 2026")
+      const monthMap = {
+        jan: '01', januari: '01', january: '01',
+        feb: '02', februari: '02', february: '02',
+        mar: '03', maret: '03', march: '03',
+        apr: '04', april: '04',
+        mei: '05', may: '05',
+        jun: '06', juni: '06', june: '06',
+        jul: '07', juli: '07', july: '07',
+        agu: '08', ags: '08', agustus: '08', aug: '08', august: '08',
+        sep: '09', sept: '09', september: '09',
+        okt: '10', oktober: '10', oct: '10', october: '10',
+        nov: '11', november: '11',
+        des: '12', desember: '12', dec: '12', december: '12'
+      };
+      const textDateMatch = trimmed.toLowerCase().match(/(\d{1,2})\s+([a-z]+)\s+(\d{4})/);
+      if (textDateMatch && monthMap[textDateMatch[2]]) {
+        return `${textDateMatch[3]}-${monthMap[textDateMatch[2]]}-${String(textDateMatch[1]).padStart(2, '0')}`;
+      }
+
+      const d = new Date(trimmed);
       if (!isNaN(d.getTime())) {
         return getISODateStr(d);
       }
-      return String(dateInput).slice(0, 10);
+      return trimmed.slice(0, 10);
+    };
+
+    const parseOrderItemsFromSheet = (rawItems, fallbackTotal = 0, catalogList = []) => {
+      let parsedList = [];
+      if (Array.isArray(rawItems)) {
+        parsedList = rawItems;
+      } else if (typeof rawItems === 'string' && rawItems.trim()) {
+        const trimmed = rawItems.trim();
+        try {
+          const json = JSON.parse(trimmed);
+          if (Array.isArray(json)) parsedList = json;
+        } catch (e) {
+          // Parse format ringkasan teks dari sheet seperti "2x Kebab Daging, 1x Kopi Gula Aren"
+          const segments = trimmed.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+          parsedList = segments.map((seg, idx) => {
+            const m = seg.match(/^(\d+)\s*[xX×]\s*(.+)$/);
+            const qty = m ? Number(m[1]) : 1;
+            const rawName = (m ? m[2] : seg).replace(/\([^)]*\)/g, '').trim();
+            const foundMenu = catalogList.find(c => c.name.toLowerCase() === rawName.toLowerCase())
+              || catalogList.find(c => rawName.toLowerCase().includes(c.name.toLowerCase()));
+            const unitPrice = foundMenu
+              ? Number(foundMenu.price)
+              : (segments.length === 1 ? Math.round(Number(fallbackTotal) / Math.max(1, qty)) : 0);
+            return {
+              name: foundMenu ? foundMenu.name : rawName,
+              qty,
+              price: unitPrice,
+              category: foundMenu ? foundMenu.category : ''
+            };
+          });
+        }
+      }
+
+      return parsedList.map(it => {
+        const name = it.name || it.nama || 'Menu';
+        const qty = Number(it.qty || it.jumlah || 1);
+        const foundMenu = catalogList.find(c => c.name.toLowerCase() === String(name).toLowerCase())
+          || catalogList.find(c => String(name).toLowerCase().includes(c.name.toLowerCase()));
+        const price = Number(it.price !== undefined ? it.price : (it.harga !== undefined ? it.harga : (foundMenu ? foundMenu.price : 0)));
+        const category = it.category || it.kategori || (foundMenu ? foundMenu.category : '');
+        return {
+          ...it,
+          name,
+          qty,
+          price,
+          category
+        };
+      });
     };
 
     const playOrderChime = () => {
@@ -320,6 +439,30 @@
       const [adminTab, setAdminTab] = useState('kasir');
       const [darkMode, setDarkMode] = useState(false);
 
+      // Jam Operasional Kedai (Global ke semua device via Google Sheets)
+      const [storeHours, setStoreHours] = useState(() => {
+        try {
+          const saved = localStorage.getItem('rs_store_hours');
+          if (saved) return { ...DEFAULT_STORE_HOURS, ...JSON.parse(saved) };
+        } catch (e) {}
+        return DEFAULT_STORE_HOURS;
+      });
+      const [hoursForm, setHoursForm] = useState(storeHours);
+      const [isSavingStoreHours, setIsSavingStoreHours] = useState(false);
+      const [timeTick, setTimeTick] = useState(() => Date.now());
+      const storeHoursRef = useRef(storeHours);
+
+      useEffect(() => {
+        storeHoursRef.current = storeHours;
+      }, [storeHours]);
+
+      useEffect(() => {
+        const t = setInterval(() => setTimeTick(Date.now()), 15000);
+        return () => clearInterval(t);
+      }, []);
+
+      const isStoreOpen = useMemo(() => checkStoreOpenStatus(storeHours), [storeHours, timeTick]);
+
       // PIN Kasir
       const CASHIER_SECRET_PIN = '1122';
       const [isPinModalOpen, setIsPinModalOpen] = useState(false);
@@ -329,26 +472,28 @@
       const [logoClicks, setLogoClicks] = useState(0);
       const clickTimerRef = useRef(null);
 
-      // User & Orders
+      // User & Orders (Langsung dari Google Sheets agar terbaca di semua HP)
       const [authMode, setAuthMode] = useState('login');
       const [isLoadingAuth, setIsLoadingAuth] = useState(false);
       const [currentUser, setCurrentUser] = useState(() => {
-        const saved = localStorage.getItem('rs_current_user');
-        return saved ? JSON.parse(saved) : null;
+        try {
+          const saved = localStorage.getItem('rs_current_user');
+          return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+          return null;
+        }
       });
 
-      const [orders, setOrders] = useState(() => {
-        const saved = localStorage.getItem('rs_orders_list');
-        if (saved) {
-          try { return JSON.parse(saved); } catch (e) {}
-        }
-        return [];
-      });
+      const [orders, setOrders] = useState([]);
 
       // Shift Kasir State
       const [shiftState, setShiftState] = useState(() => {
-        const saved = localStorage.getItem('rs_pos_shift');
-        return saved ? JSON.parse(saved) : { isOpen: false, cashierName: 'Kasir 1', modalAwal: 100000, openedAt: null };
+        try {
+          const saved = localStorage.getItem('rs_pos_shift');
+          return saved ? JSON.parse(saved) : { isOpen: false, cashierName: 'Kasir 1', modalAwal: 100000, openedAt: null };
+        } catch (e) {
+          return { isOpen: false, cashierName: 'Kasir 1', modalAwal: 100000, openedAt: null };
+        }
       });
       const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
       const [shiftModalInputName, setShiftModalInputName] = useState('Kasir 1');
@@ -363,13 +508,17 @@
 
       // Belanja Kedai
       const [expenses, setExpenses] = useState(() => {
-        const saved = localStorage.getItem('rs_pos_expenses');
-        return saved ? JSON.parse(saved) : [];
+        try {
+          const saved = localStorage.getItem('rs_pos_expenses');
+          return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+          return [];
+        }
       });
       const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
       const [expenseFilter, setExpenseFilter] = useState('Hari Ini');
 
-      // Filter Periode Admin & Kas (Hari Ini vs Kemarin)
+      // Filter Periode Admin & Kas
       const [kasPeriod, setKasPeriod] = useState('Hari Ini');
 
       // Tarik Saldo QRIS
@@ -382,37 +531,37 @@
 
       // Menu Items & Storefront
       const [menuItems, setMenuItems] = useState(() => {
-        const saved = localStorage.getItem('rs_menu_items');
-        if (saved) {
-          try {
+        try {
+          const saved = localStorage.getItem('rs_menu_items');
+          if (saved) {
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed) && parsed.length > 0) {
               return mergeMenuWithLocalOverrides(parsed);
             }
-          } catch (e) {}
-        }
+          }
+        } catch (e) {}
         return mergeMenuWithLocalOverrides(INITIAL_MENU);
       });
       const [isEditMode, setIsEditMode] = useState(false);
       const [productModal, setProductModal] = useState({ open: false, item: null });
 
-      // Banner Image State (Editable via Admin / Custom URL)
+      // Banner Image State
       const [activeBannerIdx, setActiveBannerIdx] = useState(0);
       const [customBannerUrl, setCustomBannerUrl] = useState(() => {
         return localStorage.getItem('rs_home_banner_url') || '';
       });
 
-      // Koordinat Lokasi Pusat Kedai (Terkunci Permanen sesuai Titik GPS Kedai)
+      // Koordinat Lokasi Pusat Kedai
       const [storeLocation, setStoreLocation] = useState(() => {
-        const saved = localStorage.getItem('rs_store_location');
-        if (saved) {
-          try {
+        try {
+          const saved = localStorage.getItem('rs_store_location');
+          if (saved) {
             const parsed = JSON.parse(saved);
             if (parsed && typeof parsed.lat === 'number' && typeof parsed.lng === 'number' && parsed.lat !== -0.0882) {
               return parsed;
             }
-          } catch (e) {}
-        }
+          }
+        } catch (e) {}
         return DEFAULT_STORE_LOCATION;
       });
       const [isCalibratingStore, setIsCalibratingStore] = useState(false);
@@ -484,10 +633,6 @@
       }, [currentUser]);
 
       useEffect(() => {
-        localStorage.setItem('rs_orders_list', JSON.stringify(orders));
-      }, [orders]);
-
-      useEffect(() => {
         localStorage.setItem('rs_pos_shift', JSON.stringify(shiftState));
       }, [shiftState]);
 
@@ -507,11 +652,49 @@
         localStorage.setItem('rs_saldo_fisik_terakhir', String(saldoFisikTerakhir));
       }, [saldoFisikTerakhir]);
 
+      // Ekstrak konfigurasi Jam Operasional Global dari respon server
+      const applyRemoteStoreHours = (remotePayload) => {
+        if (!remotePayload) return;
+        let parsed = null;
+        if (remotePayload.storeHours && typeof remotePayload.storeHours === 'object') {
+          parsed = remotePayload.storeHours;
+        }
+        if (!parsed && Array.isArray(remotePayload.promos)) {
+          const sysPromo = remotePayload.promos.find(
+            p => p.id === STORE_HOURS_SYS_ID || String(p.code || '').toUpperCase() === STORE_HOURS_SYS_CODE
+          );
+          if (sysPromo && sysPromo.title) {
+            try {
+              parsed = JSON.parse(sysPromo.title);
+            } catch (e) {}
+          }
+        }
+        const mList = remotePayload.menu || remotePayload.menuItems;
+        if (!parsed && Array.isArray(mList)) {
+          const sysMenu = mList.find(m => m.id === STORE_HOURS_SYS_ID);
+          if (sysMenu && (sysMenu.desc || sysMenu.deskripsi)) {
+            try {
+              parsed = JSON.parse(sysMenu.desc || sysMenu.deskripsi);
+            } catch (e) {}
+          }
+        }
+        if (parsed && typeof parsed === 'object') {
+          const remoteTs = Number(parsed.updatedAt || 0);
+          const localTs = Number(storeHoursRef.current?.updatedAt || 0);
+          if (remoteTs >= localTs || localTs === 0) {
+            const merged = { ...DEFAULT_STORE_HOURS, ...parsed };
+            setStoreHours(merged);
+            setHoursForm(prev => (isSavingStoreHours ? prev : merged));
+            localStorage.setItem('rs_store_hours', JSON.stringify(merged));
+          }
+        }
+      };
+
       const fetchAllDataFromSpreadsheet = async (showNotification = false) => {
         setIsSyncingSheets(true);
         setIsLoadingPromos(true);
         try {
-          const res = await fetch(SCRIPT_DATABASE_URL + '?action=getPosData');
+          const res = await fetch(`${SCRIPT_DATABASE_URL}?action=getPosData&_t=${Date.now()}`);
           const rawText = await res.text();
           let result;
 
@@ -523,40 +706,56 @@
           }
 
           if (result && (result.success || Array.isArray(result.orders) || Array.isArray(result.menu))) {
+            applyRemoteStoreHours(result);
+
             const menuData = result.menu || result.menuItems;
             if (Array.isArray(menuData) && menuData.length > 0) {
-              const normalizedSheetMenu = menuData.map(m => ({
-                id: m.id || `m_${Date.now()}_${Math.random()}`,
-                name: m.name || m.nama || 'Menu',
-                category: m.category || m.kategori || 'Coffee',
-                price: Number(m.price || m.harga || 0),
-                desc: m.desc || m.deskripsi || '',
-                image: m.image || m.gambar || 'https://images.bukaolshop.com/hosting/38154/08b5850b46db416355.png',
-                stock: Number(m.stock || m.stok || 40)
-              }));
+              const normalizedSheetMenu = menuData
+                .filter(m => m.id !== STORE_HOURS_SYS_ID)
+                .map(m => ({
+                  id: m.id || `m_${Date.now()}_${Math.random()}`,
+                  name: m.name || m.nama || 'Menu',
+                  category: m.category || m.kategori || 'Coffee',
+                  price: Number(m.price || m.harga || 0),
+                  desc: m.desc || m.deskripsi || '',
+                  image: m.image || m.gambar || 'https://images.bukaolshop.com/hosting/38154/08b5850b46db416355.png',
+                  stock: Number(m.stock || m.stok || 40)
+                }));
               setMenuItems(mergeMenuWithLocalOverrides(normalizedSheetMenu));
             } else {
               setMenuItems(prev => mergeMenuWithLocalOverrides(prev));
             }
 
-            if (Array.isArray(result.promos)) setPromosList(result.promos);
+            if (Array.isArray(result.promos)) {
+              setPromosList(result.promos.filter(
+                p => p.id !== STORE_HOURS_SYS_ID && String(p.code || '').toUpperCase() !== STORE_HOURS_SYS_CODE
+              ));
+            }
             
             const rawOrders = result.orders || result.riwayat || result.pesanan;
             if (Array.isArray(rawOrders)) {
+              const currentCatalog = Array.isArray(menuData) && menuData.length > 0
+                ? mergeMenuWithLocalOverrides(menuData.filter(m => m.id !== STORE_HOURS_SYS_ID).map(m => ({
+                    id: m.id,
+                    name: m.name || m.nama || 'Menu',
+                    category: m.category || m.kategori || 'Coffee',
+                    price: Number(m.price || m.harga || 0)
+                  })))
+                : menuItems;
+
               const normalizedOrders = rawOrders.map(o => {
-                let itemsList = o.items || o.detail || [];
-                if (typeof itemsList === 'string') {
-                  try { itemsList = JSON.parse(itemsList); } catch (e) {
-                    itemsList = [{ name: itemsList, qty: 1, price: Number(o.totalAmount || o.total || 0) }];
-                  }
-                }
                 const totalAmt = Number(o.totalAmount !== undefined ? o.totalAmount : (o.total || o.totalHarga || o.nominal || 0));
+                const itemsList = parseOrderItemsFromSheet(o.items || o.detail || o.pesanan || [], totalAmt, currentCatalog);
                 return {
                   orderNo: String(o.orderNo || o.noPesanan || o.id || `RS-${Math.floor(100000 + Math.random() * 900000)}`),
                   source: o.source || (o.customerPhone ? 'pos_kasir' : 'customer_web'),
+                  deliveryMethod: o.deliveryMethod || '',
+                  deliveryAddress: o.deliveryAddress || '',
+                  deliveryDistanceKm: Number(o.deliveryDistanceKm || 0),
+                  shippingFee: Number(o.shippingFee || 0),
                   customerName: o.customerName || o.namaPelanggan || o.customer || 'Pelanggan',
                   customerPhone: o.customerPhone || o.noHp || o.telepon || '-',
-                  items: Array.isArray(itemsList) ? itemsList : [],
+                  items: itemsList,
                   subtotal: Number(o.subtotal || totalAmt),
                   discountAmount: Number(o.discountAmount || o.diskon || 0),
                   appliedVoucher: o.appliedVoucher || o.voucher || null,
@@ -571,7 +770,12 @@
                   pointsEarned: Number(o.pointsEarned || o.poin || Math.floor(totalAmt / 1000)),
                   qrClaimed: Boolean(o.qrClaimed)
                 };
+              }).sort((a, b) => {
+                const tA = new Date(a.createdAt).getTime();
+                const tB = new Date(b.createdAt).getTime();
+                return (isNaN(tB) ? 0 : tB) - (isNaN(tA) ? 0 : tA);
               });
+
               setOrders(normalizedOrders);
             }
 
@@ -600,7 +804,7 @@
               setSaldoFisikTerakhir(Number(sheetSaldo));
             }
 
-            if (showNotification) showToast('Data Kasir, Menu & Mutasi Kas Sheets berhasil disinkronkan! 🔄');
+            if (showNotification) showToast('Data Kasir, Menu & Jam Operasional Sheets berhasil disinkronkan! 🔄');
           }
         } catch (err) {
           console.error('Koneksi Google Sheets terputus:', err);
@@ -613,17 +817,26 @@
 
       const fetchPromosFromSpreadsheet = async () => {
         try {
-          const res = await fetch(SCRIPT_DATABASE_URL + '?action=getPromos');
+          const res = await fetch(`${SCRIPT_DATABASE_URL}?action=getPromos&_t=${Date.now()}`);
           const rawText = await res.text();
           try {
             const result = JSON.parse(rawText);
-            if (result && result.success && Array.isArray(result.promos)) setPromosList(result.promos);
+            if (result && result.success && Array.isArray(result.promos)) {
+              applyRemoteStoreHours(result);
+              setPromosList(result.promos.filter(
+                p => p.id !== STORE_HOURS_SYS_ID && String(p.code || '').toUpperCase() !== STORE_HOURS_SYS_CODE
+              ));
+            }
           } catch (e) {}
         } catch (err) {}
       };
 
       useEffect(() => {
         fetchAllDataFromSpreadsheet();
+        const syncInterval = setInterval(() => {
+          fetchAllDataFromSpreadsheet(false);
+        }, 15000);
+        return () => clearInterval(syncInterval);
       }, []);
 
       const postToDatabase = async (payload) => {
@@ -641,6 +854,61 @@
           }
         } catch (netErr) {
           return { success: false, message: 'Gagal terhubung ke jaringan Apps Script' };
+        }
+      };
+
+      const handleSaveStoreHours = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        setIsSavingStoreHours(true);
+        const updatedConfig = {
+          openTime: hoursForm.openTime || '09:00',
+          closeTime: hoursForm.closeTime || '22:00',
+          overrideMode: hoursForm.overrideMode || 'auto',
+          closedMessage: (hoursForm.closedMessage || '').trim() || DEFAULT_STORE_HOURS.closedMessage,
+          updatedAt: Date.now()
+        };
+
+        setStoreHours(updatedConfig);
+        setHoursForm(updatedConfig);
+        localStorage.setItem('rs_store_hours', JSON.stringify(updatedConfig));
+
+        try {
+          const serializedCfg = JSON.stringify(updatedConfig);
+          const [resPromo, resMenu] = await Promise.all([
+            postToDatabase({
+              action: 'savePromo',
+              promo: {
+                id: STORE_HOURS_SYS_ID,
+                title: serializedCfg,
+                code: STORE_HOURS_SYS_CODE,
+                type: 'fixed',
+                discountPercent: 0,
+                discountAmount: 0
+              }
+            }),
+            postToDatabase({
+              action: 'saveMenuItem',
+              item: {
+                id: STORE_HOURS_SYS_ID,
+                name: 'SYS_JAM_OPERASIONAL',
+                category: 'System',
+                price: 0,
+                stock: 0,
+                desc: serializedCfg,
+                image: ''
+              }
+            })
+          ]);
+
+          if ((resPromo && resPromo.success) || (resMenu && resMenu.success)) {
+            showToast('Jam Buka & Tutup tersimpan ke Google Sheets & berlaku di semua device! 🕒');
+          } else {
+            showToast('Tersimpan lokal (cek akses Apps Script untuk sinkron lintas HP).', 'error');
+          }
+        } catch (err) {
+          showToast('Tersimpan lokal, gagal menghubungi Google Sheets.', 'error');
+        } finally {
+          setIsSavingStoreHours(false);
         }
       };
 
@@ -976,7 +1244,7 @@
         if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
 
         const itemsText = order.items.map(item => (
-          `• <b>${item.qty}x ${escapeTgHtml(item.name)}</b>\n  <i>Gula: ${escapeTgHtml(item.sugarLevel || 'Normal')}</i>${item.notes ? `\n  <i>Catatan: ${escapeTgHtml(item.notes)}</i>` : ''}`
+          `• <b>${item.qty}x ${escapeTgHtml(item.name)}</b>\n  <i>Gula: ${escapeTgHtml(item.sugarLevel || 'Normal Sugar')}</i>${item.notes ? `\n  <i>Catatan: ${escapeTgHtml(item.notes)}</i>` : ''}`
         )).join('\n');
 
         const cleanPhone = String(order.customerPhone || '').replace(/[^0-9]/g, '');
@@ -985,7 +1253,7 @@
           : (cleanPhone.startsWith('62') ? cleanPhone : '');
 
         const waItemsPlain = order.items.map(item => (
-          `- ${item.qty}x ${item.name} (${item.sugarLevel || 'Normal'})${item.notes ? ` [Catatan: ${item.notes}]` : ''}`
+          `- ${item.qty}x ${item.name} (${item.sugarLevel || 'Normal Sugar'})${item.notes ? ` [Catatan: ${item.notes}]` : ''}`
         )).join('\n');
 
         const ongkirWaText = order.deliveryMethod === 'Diantar'
@@ -1063,6 +1331,10 @@
       };
 
       const handleProcessCheckout = async () => {
+        if (!checkStoreOpenStatus(storeHours)) {
+          showToast(storeHours.closedMessage || `Kedai sedang tutup (Buka: ${storeHours.openTime} - ${storeHours.closeTime}).`, 'error');
+          return;
+        }
         if (cart.length === 0) return;
 
         if (!currentUser) {
@@ -1141,11 +1413,19 @@
         setCustomerCoords(null);
         setIsCartOpen(false);
         setCheckoutStep('cart');
-        showToast(`Pesanan ${orderNo} (${chosenDelivery === 'Diantar' ? 'ANTAR' : 'JEMPUT'}) berhasil dibuat! ☕`, 'new-order');
+        showToast(`Pesanan ${orderNo} sedang disimpan ke Google Sheets...`, 'new-order');
 
         try {
-          await postToDatabase({ action: 'saveOrder', order: newOrder });
-        } catch (err) {}
+          const saveRes = await postToDatabase({ action: 'saveOrder', order: newOrder });
+          if (saveRes && saveRes.success) {
+            showToast(`Pesanan ${orderNo} tersimpan permanen di Sheets! ☁️`);
+            await fetchAllDataFromSpreadsheet(false);
+          } else {
+            showToast(`Peringatan Sheets: ${saveRes?.message || 'Cek izin Apps Script'}`, 'error');
+          }
+        } catch (err) {
+          showToast('Gagal menyimpan ke Google Sheets. Periksa koneksi internet.', 'error');
+        }
       };
 
       const handleCompletePosOrder = async () => {
@@ -1177,6 +1457,7 @@
         };
 
         setOrders(prev => [newPosOrder, ...prev]);
+        setHistoryFilter('Hari Ini');
         sendTelegramNotification(newPosOrder);
 
         setPosCart([]);
@@ -1187,11 +1468,19 @@
         setIsPosCartModalOpen(false);
 
         setActiveOrderReceipt(newPosOrder);
-        showToast(`Transaksi ${orderNo} selesai & tersimpan permanen! 🎉`, 'new-order');
+        showToast(`Menyimpan transaksi ${orderNo} ke Google Sheets...`, 'new-order');
 
         try {
-          await postToDatabase({ action: 'saveOrder', order: newPosOrder });
-        } catch (err) {}
+          const saveRes = await postToDatabase({ action: 'saveOrder', order: newPosOrder });
+          if (saveRes && saveRes.success) {
+            showToast(`Transaksi ${orderNo} sukses masuk ke Google Sheets! ☁️`);
+            await fetchAllDataFromSpreadsheet(false);
+          } else {
+            showToast(`Gagal simpan ke Sheets: ${saveRes?.message || 'Cek script Code.gs'}`, 'error');
+          }
+        } catch (err) {
+          showToast('Koneksi terputus saat mengirim transaksi ke Google Sheets!', 'error');
+        }
       };
 
       const handleConfirmWebOrder = async (orderNo) => {
@@ -1201,15 +1490,19 @@
           }
           return o;
         }));
-        showToast(`Pesanan ${orderNo} telah dikonfirmasi LUNAS oleh kasir!`);
+        showToast(`Mengonfirmasi ${orderNo} LUNAS ke Google Sheets...`);
 
         try {
-          await postToDatabase({
+          const res = await postToDatabase({
             action: 'updateOrderStatus',
             orderNo: orderNo,
             status: 'Lunas',
             cashier: shiftState.cashierName || 'Kasir 1'
           });
+          if (res && res.success) {
+            showToast(`Pesanan ${orderNo} LUNAS & tersinkron ke semua HP! ☁️`);
+            await fetchAllDataFromSpreadsheet(false);
+          }
         } catch (err) {}
       };
 
@@ -1221,6 +1514,10 @@
       }, [currentUser]);
 
       const handleOpenDetail = (product) => {
+        if (!checkStoreOpenStatus(storeHours)) {
+          showToast(storeHours.closedMessage || `Kedai sedang tutup (Jam buka: ${storeHours.openTime} - ${storeHours.closeTime}).`, 'error');
+          return;
+        }
         setSelectedProduct(product);
         setSugarLevel('Normal Sugar');
         setOrderNotes('');
@@ -1229,6 +1526,11 @@
 
       const executeAddToCart = (chosenMethod) => {
         if (!selectedProduct) return;
+        if (!checkStoreOpenStatus(storeHours)) {
+          setSelectedProduct(null);
+          showToast(storeHours.closedMessage || `Kedai sedang tutup (Jam buka: ${storeHours.openTime} - ${storeHours.closeTime}).`, 'error');
+          return;
+        }
         const activeMethod = chosenMethod || deliveryMethod || 'Ambil di Kasir';
         const cartItem = {
           cartItemId: Date.now().toString(),
@@ -1259,6 +1561,11 @@
 
       const handleAddToCart = () => {
         if (!selectedProduct) return;
+        if (!checkStoreOpenStatus(storeHours)) {
+          setSelectedProduct(null);
+          showToast(storeHours.closedMessage || `Kedai sedang tutup (Jam buka: ${storeHours.openTime} - ${storeHours.closeTime}).`, 'error');
+          return;
+        }
         if (!deliveryMethod) {
           setPendingProductAction(true);
           setIsDeliveryModalOpen(true);
@@ -1443,10 +1750,10 @@
 
         const activeQrisBalance = Math.max(0, rawQrisTotal - qrisWithdrawn);
         const modalAwal = shiftState.isOpen ? (shiftState.modalAwal || 0) : 0;
+        const baseSaldoFisik = saldoFisikTerakhir !== 0 ? saldoFisikTerakhir : modalAwal;
         
-        const totalFisik = saldoFisikTerakhir !== 0 
-          ? saldoFisikTerakhir 
-          : (modalAwal + totalCashIn - totalExpenses);
+        // Setiap order tunai masuk otomatis menambah uang fisik di laci, dikurangi belanja operasional
+        const totalFisik = Math.max(0, baseSaldoFisik + totalCashIn - totalExpenses);
 
         const omsetKotor = totalCashIn + rawQrisTotal;
         const omsetBersih = omsetKotor - totalExpenses;
@@ -1457,6 +1764,7 @@
           rawQrisTotal,
           totalExpenses,
           modalAwal,
+          baseSaldoFisik,
           totalFisik,
           omsetKotor,
           omsetBersih
@@ -1478,27 +1786,31 @@
           if (Array.isArray(ord.items)) {
             ord.items.forEach(it => {
               const qty = Number(it.qty) || 1;
-              const price = Number(it.price) || 0;
+              const itemName = it.name || 'Menu';
+              const matchedCatalog = menuItems.find(m => m.name.toLowerCase() === itemName.toLowerCase())
+                || menuItems.find(m => itemName.toLowerCase().includes(m.name.toLowerCase()));
+              const price = Number(it.price) || (matchedCatalog ? Number(matchedCatalog.price) : 0);
               const revenue = price * qty;
-              const cat = it.category || '';
-              const isFood = cat.toLowerCase() === 'cemilan' || it.name.toLowerCase().includes('kebab') || it.name.toLowerCase().includes('burger');
+              const cat = (it.category || (matchedCatalog ? matchedCatalog.category : '') || '').toLowerCase();
+              const lowerName = itemName.toLowerCase();
+              const isFood = cat === 'cemilan' || cat === 'makanan' || lowerName.includes('kebab') || lowerName.includes('burger');
 
               if (isFood) {
                 foodPortions += qty;
                 foodRevenue += revenue;
-                if (!foodMap[it.name]) {
-                  foodMap[it.name] = { name: it.name, qty: 0, price: price, omset: 0 };
+                if (!foodMap[itemName]) {
+                  foodMap[itemName] = { name: itemName, qty: 0, price: price, omset: 0 };
                 }
-                foodMap[it.name].qty += qty;
-                foodMap[it.name].omset += revenue;
+                foodMap[itemName].qty += qty;
+                foodMap[itemName].omset += revenue;
               } else {
                 drinkCups += qty;
                 drinkRevenue += revenue;
-                if (!drinkMap[it.name]) {
-                  drinkMap[it.name] = { name: it.name, qty: 0, price: price, omset: 0 };
+                if (!drinkMap[itemName]) {
+                  drinkMap[itemName] = { name: itemName, qty: 0, price: price, omset: 0 };
                 }
-                drinkMap[it.name].qty += qty;
-                drinkMap[it.name].omset += revenue;
+                drinkMap[itemName].qty += qty;
+                drinkMap[itemName].omset += revenue;
               }
             });
           }
@@ -1508,8 +1820,8 @@
         const drinkLabaFlat = drinkCups * 3000;
 
         const totalItemsCount = foodPortions + drinkCups;
-        const foodPercent = totalItemsCount > 0 ? Math.round((foodPortions / totalItemsCount) * 100) : 39;
-        const drinkPercent = totalItemsCount > 0 ? (100 - foodPercent) : 61;
+        const foodPercent = totalItemsCount > 0 ? Math.round((foodPortions / totalItemsCount) * 100) : 0;
+        const drinkPercent = totalItemsCount > 0 ? (100 - foodPercent) : 0;
 
         return {
           foodPortions,
@@ -1523,7 +1835,7 @@
           foodPercent,
           drinkPercent
         };
-      }, [periodFilteredOrders]);
+      }, [periodFilteredOrders, menuItems]);
 
       const handleOpenShiftModal = () => {
         if (!shiftState.isOpen) {
@@ -1645,7 +1957,11 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                       </>
                     ) : (
                       <>
-                        RUANG SEDUH <span className="text-[10px] bg-sky-500/15 text-[#1565c0] px-1.5 py-0.5 rounded font-bold uppercase">PREMIUM</span>
+                        RUANG SEDUH{' '}
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold uppercase flex items-center gap-1 ${isStoreOpen ? 'bg-emerald-500/15 text-emerald-700' : 'bg-rose-500/15 text-rose-700'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${isStoreOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
+                          {isStoreOpen ? 'BUKA' : 'TUTUP'}
+                        </span>
                       </>
                     )}
                   </h1>
@@ -1656,7 +1972,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                         {shiftState.isOpen ? `Shift Aktif • Kasir: ${shiftState.cashierName}` : 'Shift Tutup'}
                       </span>
                     ) : (
-                      'Coffee & Artisanal Brew'
+                      <span>Jam Operasional: {storeHours.openTime} - {storeHours.closeTime}</span>
                     )}
                   </p>
                 </div>
@@ -1705,10 +2021,30 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
           <main className="max-w-xl mx-auto px-4 pt-4 w-full">
             
             {/* ========================================================================= */}
-            {/* MODE PELANGGAN (STOREFRONT PEMBELI UTUH 100%)                              */}
+            {/* MODE PELANGGAN                                                            */}
             {/* ========================================================================= */}
             {activeRole === 'customer' ? (
               <div>
+                {/* Banner Pemberitahuan Tutup */}
+                {!isStoreOpen && (
+                  <div className="mb-4 bg-rose-600 text-white p-3.5 rounded-2xl shadow-md flex items-center gap-3 border border-rose-400">
+                    <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                      <Lock className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black uppercase tracking-wider">Kedai Sedang Tutup</span>
+                        <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">
+                          Buka: {storeHours.openTime} - {storeHours.closeTime}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-rose-100 mt-0.5 leading-snug">
+                        {storeHours.closedMessage}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <nav className="hidden md:flex items-center justify-between bg-white p-2 rounded-2xl border border-slate-200 mb-6 shadow-sm">
                   <div className="flex gap-1">
                     {[
@@ -1987,9 +2323,9 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                                         e.stopPropagation();
                                         handleOpenDetail(item);
                                       }}
-                                      className="w-7 h-7 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-900 flex items-center justify-center font-black shadow-sm active:scale-90 transition"
+                                      className={`w-7 h-7 rounded-full flex items-center justify-center font-black shadow-sm transition ${isStoreOpen ? 'bg-amber-400 hover:bg-amber-500 text-slate-900 active:scale-90' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
                                     >
-                                      <Plus className="w-4 h-4" />
+                                      {isStoreOpen ? <Plus className="w-4 h-4" /> : <Lock className="w-3.5 h-3.5" />}
                                     </button>
                                   </div>
                                 </div>
@@ -2077,7 +2413,9 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                           </div>
                           <div className="p-3 pt-0 flex items-center justify-between border-t border-slate-100 mt-1">
                             <span className="text-xs sm:text-sm font-extrabold text-[#1565c0]">Rp {product.price.toLocaleString('id-ID')}</span>
-                            <button onClick={() => handleOpenDetail(product)} className="bg-[#1565c0] text-white p-2 rounded-xl shadow"><Plus className="w-4 h-4" /></button>
+                            <button onClick={() => handleOpenDetail(product)} className={`p-2 rounded-xl shadow ${isStoreOpen ? 'bg-[#1565c0] text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                              {isStoreOpen ? <Plus className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -2287,7 +2625,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
             ) : (
 
               /* ========================================================================= */
-              /* MODE KASIR & ADMIN PINTAR (DIPADUKAN MUTASI KAS & LAPORAN ANALITIK)       */
+              /* MODE KASIR & ADMIN PINTAR                                                 */
               /* ========================================================================= */
               <div className="space-y-4 max-w-4xl mx-auto">
                 
@@ -2585,7 +2923,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                       return (
                         <>
                           <div className="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
-                            <span>Riwayat Order ({historyFilter})</span>
+                            <span>Riwayat Order ({historyFilter}) • Google Sheets</span>
                             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${filteredList.length > 0 ? 'bg-blue-100 text-[#1565c0]' : 'bg-slate-200 text-slate-600'}`}>
                               {filteredList.length} Pesanan
                             </span>
@@ -2599,9 +2937,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                                   {historyFilter === 'Hari Ini' ? 'Belum Ada Pesanan Hari Ini' : historyFilter === 'Shift Aktif' ? 'Belum Ada Pesanan Pada Shift Ini' : 'Belum Ada Riwayat Pesanan'}
                                 </h4>
                                 <p className="text-xs text-slate-400">
-                                  {historyFilter === 'Hari Ini' 
-                                    ? 'Transaksi kasir atau orderan pelanggan web yang masuk hari ini akan tampil di sini.' 
-                                    : 'Pesanan baru akan otomatis masuk dan diperbarui secara real-time.'}
+                                  Seluruh transaksi langsung tersinkron dari Google Sheets dan tampil di semua perangkat Anda.
                                 </p>
                               </div>
                             ) : (
@@ -2766,7 +3102,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                   </div>
                 )}
 
-                {/* TAB 4: KAS UTAMA, BRANKAS OWNER & DASHBOARD ANALITIK LAPORAN */}
+                {/* TAB 4: KAS UTAMA, BRANKAS OWNER & PENGATURAN JAM BUKA/TUTUP GLOBAL */}
                 {adminTab === 'brankas' && (
                   <div className="space-y-5">
                     
@@ -2786,6 +3122,89 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                         </button>
                       </div>
                     </div>
+
+                    {/* PENGATURAN JAM BUKA & TUTUP OPERASIONAL (SINKRON GLOBAL KE SEMUA DEVICE) */}
+                    <form onSubmit={handleSaveStoreHours} className="bg-white rounded-3xl p-5 border border-blue-200 shadow-sm space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1565c0] flex items-center justify-center">
+                            <Clock className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-xs font-extrabold text-slate-800">Jam Buka & Tutup Kedai (Semua Device)</h3>
+                            <p className="text-[10px] text-slate-500">Otomatis mengunci keranjang & order saat tutup</p>
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase ${isStoreOpen ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                          {isStoreOpen ? '● Sedang Buka' : '● Sedang Tutup'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-2xl">
+                        {[
+                          { id: 'auto', label: '🕒 Jadwal Jam' },
+                          { id: 'open', label: '✅ Buka Manual' },
+                          { id: 'closed', label: '🔒 Tutup Manual' }
+                        ].map(mode => (
+                          <button
+                            key={mode.id}
+                            type="button"
+                            onClick={() => setHoursForm(prev => ({ ...prev, overrideMode: mode.id }))}
+                            className={`py-2 rounded-xl text-[11px] font-extrabold transition ${
+                              hoursForm.overrideMode === mode.id
+                                ? 'bg-[#1565c0] text-white shadow'
+                                : 'text-slate-600 hover:bg-white/60'
+                            }`}
+                          >
+                            {mode.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Jam Buka</label>
+                          <input
+                            type="time"
+                            value={hoursForm.openTime}
+                            onChange={(e) => setHoursForm(prev => ({ ...prev, openTime: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-extrabold text-slate-800 outline-none focus:ring-2 focus:ring-[#1565c0]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Jam Tutup</label>
+                          <input
+                            type="time"
+                            value={hoursForm.closeTime}
+                            onChange={(e) => setHoursForm(prev => ({ ...prev, closeTime: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-extrabold text-slate-800 outline-none focus:ring-2 focus:ring-[#1565c0]"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Pesan Saat Kedai Tutup</label>
+                        <input
+                          type="text"
+                          value={hoursForm.closedMessage}
+                          onChange={(e) => setHoursForm(prev => ({ ...prev, closedMessage: e.target.value }))}
+                          placeholder="Maaf, kedai Ruang Seduh sedang tutup..."
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs outline-none focus:ring-2 focus:ring-[#1565c0]"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSavingStoreHours}
+                        className="w-full bg-[#1565c0] hover:bg-blue-700 text-white py-2.5 rounded-xl font-extrabold text-xs shadow flex items-center justify-center gap-2 transition active:scale-95"
+                      >
+                        {isSavingStoreHours ? (
+                          <LoadingSpinnerGif className="w-4 h-4" text="Menyimpan ke Semua Device..." />
+                        ) : (
+                          <span>☁ Simpan & Terapkan ke Semua Device</span>
+                        )}
+                      </button>
+                    </form>
 
                     {/* Pengaturan Gambar Banner Halaman Home */}
                     <div className="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-2.5">
@@ -2819,7 +3238,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                       </div>
                     </div>
 
-                    {/* Kalibrasi Titik GPS Pusat Kedai (Presisi Tinggi untuk Ongkir) */}
+                    {/* Kalibrasi Titik GPS Pusat Kedai */}
                     <div className="bg-white rounded-3xl p-4 border border-blue-200 shadow-sm space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
@@ -2901,8 +3320,8 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
 
                         <div className="text-[11px] text-slate-600 border-t border-blue-200 pt-2 space-y-1">
                           <div className="flex justify-between items-center bg-blue-100/70 p-1.5 rounded-lg border border-blue-200">
-                            <span className="text-[#1565c0] font-medium">• Saldo Fisik Terakhir (Sheet):</span>
-                            <span className="font-bold text-[#1565c0]">Rp {saldoFisikTerakhir.toLocaleString('id-ID')}</span>
+                            <span className="text-[#1565c0] font-medium">• Saldo Awal / Terakhir (Sheet):</span>
+                            <span className="font-bold text-[#1565c0]">Rp {financialSummary.baseSaldoFisik.toLocaleString('id-ID')}</span>
                           </div>
                           <div className="flex justify-between px-1.5 pt-1">
                             <span className="text-slate-500">• Penjualan Tunai ({kasPeriod}):</span>
@@ -2912,7 +3331,7 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                             <span className="text-slate-500">• Belanja Operasional ({kasPeriod}):</span>
                             <span className="font-bold text-rose-500">-Rp {financialSummary.totalExpenses.toLocaleString('id-ID')}</span>
                           </div>
-                          <p className="text-[9px] text-slate-400 italic px-1.5 pt-1 border-t border-blue-200">Total kas laci fisik mengikuti mutlak data Saldo Fisik Terakhir dari Sheet Mutasi Kas.</p>
+                          <p className="text-[9px] text-slate-400 italic px-1.5 pt-1 border-t border-blue-200">Otomatis bertambah setiap ada pesanan tunai masuk & berkurang saat ada belanja operasional.</p>
                         </div>
                       </div>
 
@@ -3890,9 +4309,17 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
                     </div>
                   </div>
 
-                  <button onClick={handleAddToCart} className="w-full bg-[#1565c0] text-white py-3.5 rounded-xl font-bold text-xs shadow-lg flex items-center justify-between px-5">
-                    <span>Tambah ke Keranjang ({itemQty} Porsi)</span>
-                    <span className="font-black text-sky-200">Rp {(selectedProduct.price * itemQty).toLocaleString('id-ID')}</span>
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!isStoreOpen}
+                    className={`w-full py-3.5 rounded-xl font-bold text-xs shadow-lg flex items-center justify-between px-5 ${
+                      isStoreOpen
+                        ? 'bg-[#1565c0] text-white'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    }`}
+                  >
+                    <span>{isStoreOpen ? `Tambah ke Keranjang (${itemQty} Porsi)` : 'Kedai Sedang Tutup'}</span>
+                    <span className={`font-black ${isStoreOpen ? 'text-sky-200' : 'text-slate-500'}`}>Rp {(selectedProduct.price * itemQty).toLocaleString('id-ID')}</span>
                   </button>
                 </div>
               </div>
@@ -4189,7 +4616,11 @@ Laporan otomatis dibuat dari POS Pintar Ruang Seduh`;
 
                 {cart.length > 0 && (
                   <div className="p-4 border-t space-y-2">
-                    {checkoutStep === 'cart' ? (
+                    {!isStoreOpen ? (
+                      <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-xl text-center text-xs font-bold">
+                        🔒 Kedai sedang tutup ({storeHours.openTime} - {storeHours.closeTime}). Tidak dapat melakukan pemesanan.
+                      </div>
+                    ) : checkoutStep === 'cart' ? (
                       <button onClick={() => setCheckoutStep('payment')} className="w-full bg-[#1565c0] text-white py-3.5 rounded-xl font-bold text-sm shadow">Lanjut ke Pembayaran</button>
                     ) : (
                       <button onClick={handleProcessCheckout} className="w-full bg-sky-500 text-white py-3.5 rounded-xl font-extrabold text-sm shadow">
